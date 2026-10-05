@@ -10,8 +10,5 @@ CREATE TABLE VEHICLE (
     Model VARCHAR(50),
     YOM INT,
     Color VARCHAR(30),
-    Type VARCHAR(30),
-    Replaces_Plate_Num VARCHAR(20) NOT NULL,
-    FOREIGN KEY (Replaces_Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    Type VARCHAR(30)
 );
