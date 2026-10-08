@@ -1,3 +1,6 @@
+CREATE DATABASE VehicleManagement;
+USE VehicleManagement;
+
 CREATE TABLE VEHICLE (
     Plate_Num VARCHAR(20) PRIMARY KEY,
     Chassis_Num VARCHAR(50) UNIQUE,
@@ -8,62 +11,63 @@ CREATE TABLE VEHICLE (
     Color VARCHAR(30),
     Type VARCHAR(30),
     Previous_Plate_Num VARCHAR(20) NULL,
-
-    FOREIGN KEY (Previous_Plate_Num) 
+    FOREIGN KEY (Previous_Plate_Num)
         REFERENCES VEHICLE(Plate_Num)
 );
-create table Owner(
-Owner_ID int NOT NULL,
-Street varchar(250),
-District varchar(250),
-City varchar(250),
-primary key(owner_ID)
-);
-create table Individual (
-Owner_ID int NOT NULL,
 
-Fname varchar(50) NOT NULL,
-Mname varchar(50) NOT NULL,
-Lname varchar(50) NOT NULL,
+CREATE TABLE Owner (
+    Owner_ID INT NOT NULL,
+    Street VARCHAR(250),
+    District VARCHAR(250),
+    City VARCHAR(250),
+    PRIMARY KEY (Owner_ID)
+);
 
-DoB date,
+CREATE TABLE Individual (
+    Owner_ID INT NOT NULL,
+    Fname VARCHAR(50) NOT NULL,
+    Mname VARCHAR(50) NOT NULL,
+    Lname VARCHAR(50) NOT NULL,
+    DoB DATE,
+    Gender VARCHAR(10),
+    Indentity_Card VARCHAR(50) UNIQUE,
+    PRIMARY KEY (Owner_ID),
+    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+);
 
-Gender varchar(10),
-Indentity_Card varchar(50) UNIQUE,
+CREATE TABLE Organisation (
+    Owner_ID INT NOT NULL,
+    Company_Name VARCHAR(250) NOT NULL,
+    Tax_Code VARCHAR(50) UNIQUE,
+    Represent_Name VARCHAR(250),
+    PRIMARY KEY (Owner_ID),
+    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+);
 
-primary key(Owner_ID),
-foreign key(Owner_ID) references Owner(Owner_ID)
+CREATE TABLE Owner_email (
+    Owner_ID INT NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    PRIMARY KEY (Owner_ID),
+    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
 );
-create table Organisation ( 
-Owner_ID int NOT NULL,
-Company_Name varchar(250) NOT NULL,
-Tax_Code varchar(50) UNIQUE,
-Represent_Name varchar(250),
-primary key(Owner_ID),
-foreign key(Owner_ID) references Owner(Owner_ID)
-);
-create table Owner_email(
-Owner_ID int NOT NULL,
-email varchar(100) not null unique,
-primary key(Owner_ID),
-foreign key(Owner_ID) references Owner(Owner_ID)
-);
-create table Owner_phone(
-Owner_ID int NOT NULL,
-Phone varchar(20) NOT NULL,
-primary key(Owner_ID),
-foreign key(Owner_ID) references Owner(Owner_ID)
-);
-create table Ownership(
-Ownership_ID int NOT NULL,
-Owner_ID int NOT NULL,
-Start_Date date,
-End_Date date,
-Transfer_Type varchar (100),
 
-primary key(Ownership_ID),
-foreign key(Owner_ID) references Owner(Owner_ID)
+CREATE TABLE Owner_phone (
+    Owner_ID INT NOT NULL,
+    Phone VARCHAR(20) NOT NULL,
+    PRIMARY KEY (Owner_ID),
+    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
 );
+
+CREATE TABLE Ownership (
+    Ownership_ID INT NOT NULL,
+    Owner_ID INT NOT NULL,
+    Start_Date DATE,
+    End_Date DATE,
+    Transfer_Type VARCHAR(100),
+    PRIMARY KEY (Ownership_ID),
+    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+);
+
 CREATE TABLE REGISTRATION (
     Registration_ID INT PRIMARY KEY,
     Registration_Date DATE,
@@ -71,10 +75,9 @@ CREATE TABLE REGISTRATION (
     Status VARCHAR(30),
     Issued_By VARCHAR(100),
     Plate_Num VARCHAR(20),
-
-    FOREIGN KEY (Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
+
 CREATE TABLE INSURANCEPOLICY (
     Policy_Num VARCHAR(30) PRIMARY KEY,
     Policy_Name VARCHAR(100),
@@ -82,10 +85,9 @@ CREATE TABLE INSURANCEPOLICY (
     End_Date DATE,
     Insurance_Type VARCHAR(50),
     Plate_Num VARCHAR(20),
-
-    FOREIGN KEY (Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
+
 CREATE TABLE INSPECTION (
     Inspection_ID INT PRIMARY KEY,
     Inspection_Date DATE,
@@ -94,21 +96,19 @@ CREATE TABLE INSPECTION (
     Expiry_Date DATE,
     Notes VARCHAR(255),
     Plate_Num VARCHAR(20),
-
-    FOREIGN KEY (Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
-CREATE TABLE FINE (
-    Fine_Num INT PRIMARY KEY,
-    Violate_ID INT,
-    Amount DECIMAL(10,2),
-    Due_Date DATE,
-    Payment_Status VARCHAR(30),
-    Paid_Date DATE,
 
-    FOREIGN KEY (Violate_ID)
-        REFERENCES TRAFFICVIOLATION(Violate_ID)
+CREATE TABLE TRAFFICVIOLATION (
+    Violate_ID INT PRIMARY KEY,
+    Violation_Type VARCHAR(100),
+    Violation_Date DATE,
+    Location VARCHAR(255),
+    Description VARCHAR(255),
+    Plate_Num VARCHAR(20),
+    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
+
 CREATE TABLE FINE (
     Fine_Num INT NOT NULL,
     Violate_ID INT NOT NULL,
@@ -122,3 +122,16 @@ CREATE TABLE FINE (
     FOREIGN KEY (Violate_ID)
         REFERENCES TRAFFICVIOLATION(Violate_ID)
 );
+CREATE TABLE TRAFFICVIOLATION (
+    Violate_ID INT PRIMARY KEY,
+    Violation_Type VARCHAR(100),
+    Violation_Date DATE,
+    Location VARCHAR(255),
+    Description VARCHAR(255),
+    Plate_Num VARCHAR(20),
+
+    FOREIGN KEY (Plate_Num)
+        REFERENCES VEHICLE(Plate_Num)
+);
+--check table
+SHOW TABLES;
