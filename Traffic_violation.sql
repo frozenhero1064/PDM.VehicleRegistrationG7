@@ -1,11 +1,10 @@
-CREATE TABLE FINE (
-    Fine_Num INT PRIMARY KEY,
-    Violate_ID INT,
-    Amount DECIMAL(10,2),
-    Due_Date DATE,
-    Payment_Status VARCHAR(30),
-    Paid_Date DATE,
+CREATE TABLE TRAFFICVIOLATION (
+    Violate_ID INT PRIMARY KEY,
+    Violation_Type VARCHAR(100),
+    Violation_Date DATE,
+    Location VARCHAR(255),
+    Description VARCHAR(255),
+    Plate_Num VARCHAR(20),
 
-    FOREIGN KEY (Violate_ID)
-        REFERENCES TRAFFICVIOLATION(Violate_ID)
-);
+    FOREIGN KEY (Plate_Num)
+        REFERENCES VEHICLE(Plate_Num)
