@@ -4,11 +4,9 @@ import java.awt.*;
 import java.sql.*;
 
 public class MainFrame extends JFrame {
-
-    // Database connection settings - Update DB_PASS to match your MySQL password!
     private static final String DB_URL = "jdbc:mysql://localhost:3306/VehicleManagement";
     private static final String DB_USER = "root";
-    private static final String DB_PASS = "Duy16920()7"; 
+    private static final String DB_PASS = "password"; 
 
     private DefaultTableModel vehicleTableModel;
     private JTable vehicleTable;
@@ -29,7 +27,6 @@ public class MainFrame extends JFrame {
 
         add(mainTabs);
 
-        // Load vehicles from database on startup
         loadVehiclesFromDatabase();
     }
 
@@ -54,7 +51,6 @@ public class MainFrame extends JFrame {
         vehicleTable = new JTable(vehicleTableModel);
         JScrollPane tableScroll = new JScrollPane(vehicleTable);
 
-        // Button Actions
         btAdd.addActionListener(e -> showAddVehicleDialog());
         btRemove.addActionListener(e -> removeSelectedVehicle());
         btRefresh.addActionListener(e -> loadVehiclesFromDatabase());
@@ -66,7 +62,7 @@ public class MainFrame extends JFrame {
     }
 
     private void loadVehiclesFromDatabase() {
-        vehicleTableModel.setRowCount(0); // Clear current table rows
+        vehicleTableModel.setRowCount(0);
         String query = "SELECT Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type FROM VEHICLE";
 
         try (Connection conn = getConnection();
@@ -87,7 +83,6 @@ public class MainFrame extends JFrame {
                 vehicleTableModel.addRow(row);
             }
         } catch (SQLException ex) {
-            // If MySQL isn't connected yet, show a helpful message instead of crashing
             System.out.println("Database connection note: " + ex.getMessage());
         }
     }
@@ -154,7 +149,7 @@ public class MainFrame extends JFrame {
 
                 pstmt.executeUpdate();
                 JOptionPane.showMessageDialog(this, "Vehicle saved to database successfully!");
-                loadVehiclesFromDatabase(); // Refresh table
+                loadVehiclesFromDatabase();
 
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Error saving to database:\n" + ex.getMessage(),

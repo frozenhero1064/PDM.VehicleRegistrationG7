@@ -1,4 +1,4 @@
-CREATE DATABASE VehicleManagement;
+CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
 CREATE TABLE VEHICLE (
@@ -116,9 +116,7 @@ CREATE TABLE FINE (
     Due_Date DATE,
     Payment_Status VARCHAR(30),
     Paid_Date DATE,
-
     PRIMARY KEY (Fine_Num, Violate_ID),
-
     FOREIGN KEY (Violate_ID)
         REFERENCES TRAFFICVIOLATION(Violate_ID)
 );
