@@ -16,56 +16,56 @@ CREATE TABLE VEHICLE (
 );
 
 CREATE TABLE Owner (
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     Street VARCHAR(250),
     District VARCHAR(250),
     City VARCHAR(250),
-    PRIMARY KEY (Owner_ID)
+    PRIMARY KEY (OwnerID)
 );
 
 CREATE TABLE Individual (
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     Fname VARCHAR(50) NOT NULL,
     Mname VARCHAR(50) NOT NULL,
     Lname VARCHAR(50) NOT NULL,
     DoB DATE,
     Gender VARCHAR(10),
-    Indentity_Card VARCHAR(50) UNIQUE,
-    PRIMARY KEY (Owner_ID),
-    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    Identity_Card VARCHAR(50) UNIQUE,
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 );
 
 CREATE TABLE Organisation (
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     Company_Name VARCHAR(250) NOT NULL,
     Tax_Code VARCHAR(50) UNIQUE,
     Represent_Name VARCHAR(250),
-    PRIMARY KEY (Owner_ID),
-    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 );
 
 CREATE TABLE Owner_email (
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    PRIMARY KEY (Owner_ID),
-    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 );
 
 CREATE TABLE Owner_phone (
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     Phone VARCHAR(20) NOT NULL,
-    PRIMARY KEY (Owner_ID),
-    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 );
 
 CREATE TABLE Ownership (
     Ownership_ID INT NOT NULL,
-    Owner_ID INT NOT NULL,
+    OwnerID INT NOT NULL,
     Start_Date DATE,
     End_Date DATE,
     Transfer_Type VARCHAR(100),
     PRIMARY KEY (Ownership_ID),
-    FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 );
 
 CREATE TABLE REGISTRATION (
