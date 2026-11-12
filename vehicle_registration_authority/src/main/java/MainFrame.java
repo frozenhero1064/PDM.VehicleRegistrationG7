@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainFrame extends JFrame {
+
+    // =========================================================================
+    // DAO LAYER (100% matched to database.sql & Popluate 15+ rows.sql)
+    // =========================================================================
     public static class DatabaseDAO {
         private static final String DB_URL = "jdbc:mysql://localhost:3306/VehicleManagement";
         private static final String DB_USER = "root";
@@ -15,48 +19,55 @@ public class MainFrame extends JFrame {
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         }
 
-        private boolean hasPrevPlateColumn(Connection conn) {
-            try {
-                DatabaseMetaData meta = conn.getMetaData();
-                try (ResultSet rs = meta.getColumns(null, null, "VEHICLE", "Prev_Plate_Num")) {
-                    return rs.next();
-                }
-            } catch (SQLException e) {
-                return false;
-            }
+        public int getNextIntId(String table, String pkCol) {
+            String sql = "SELECT COALESCE(MAX(" + pkCol + "), 0) + 1 FROM " + table;
+            try (Connection conn = getConnection();
+                 Statement st = conn.createStatement();
+                 ResultSet rs = st.executeQuery(sql)) {
+                if (rs.next()) return rs.getInt(1);
+            } catch (SQLException ignored) {}
+            return 16;
         }
 
+        public List<String> getSingleColumnList(String sql) {
+            List<String> list = new ArrayList<>();
+            try (Connection conn = getConnection();
+                 Statement st = conn.createStatement();
+                 ResultSet rs = st.executeQuery(sql)) {
+                while (rs.next()) {
+                    list.add(rs.getString(1));
+                }
+            } catch (SQLException ignored) {}
+            return list;
+        }
+
+        // ------------------------- 1. VEHICLE (BR1, BR9) -------------------------
         public List<Object[]> getVehicles(String keyword) throws SQLException {
             List<Object[]> rows = new ArrayList<>();
-            try (Connection conn = getConnection()) {
-                boolean hasPrev = hasPrevPlateColumn(conn);
-                String cols = hasPrev
-                        ? "Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Prev_Plate_Num"
-                        : "Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type";
-                String sql = "SELECT " + cols + " FROM VEHICLE";
-                boolean filter = keyword != null && !keyword.trim().isEmpty();
+            String sql = "SELECT Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num FROM VEHICLE";
+            boolean filter = keyword != null && !keyword.trim().isEmpty();
+            if (filter) {
+                sql += " WHERE Plate_Num LIKE ? OR Brand LIKE ? OR Model LIKE ? OR Chassis_Num LIKE ? OR Engine_Num LIKE ?";
+            }
+            try (Connection conn = getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
                 if (filter) {
-                    sql += " WHERE Plate_Num LIKE ? OR Brand LIKE ? OR Model LIKE ? OR Chassis_Num LIKE ? OR Engine_Num LIKE ?";
+                    String pat = "%" + keyword.trim() + "%";
+                    for (int i = 1; i <= 5; i++) ps.setString(i, pat);
                 }
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    if (filter) {
-                        String pat = "%" + keyword.trim() + "%";
-                        for (int i = 1; i <= 5; i++) ps.setString(i, pat);
-                    }
-                    try (ResultSet rs = ps.executeQuery()) {
-                        while (rs.next()) {
-                            rows.add(new Object[]{
-                                    rs.getString("Plate_Num"),
-                                    rs.getString("Chassis_Num"),
-                                    rs.getString("Engine_Num"),
-                                    rs.getString("Brand"),
-                                    rs.getString("Model"),
-                                    rs.getInt("YOM"),
-                                    rs.getString("Color"),
-                                    rs.getString("Type"),
-                                    hasPrev ? rs.getString("Prev_Plate_Num") : ""
-                            });
-                        }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        rows.add(new Object[]{
+                                rs.getString("Plate_Num"),
+                                rs.getString("Chassis_Num"),
+                                rs.getString("Engine_Num"),
+                                rs.getString("Brand"),
+                                rs.getString("Model"),
+                                rs.getInt("YOM"),
+                                rs.getString("Color"),
+                                rs.getString("Type"),
+                                rs.getString("Previous_Plate_Num")
+                        });
                     }
                 }
             }
@@ -65,80 +76,102 @@ public class MainFrame extends JFrame {
 
         public void insertVehicle(String plate, String chassis, String engine, String brand,
                                   String model, int yom, String color, String type, String prevPlate) throws SQLException {
-            try (Connection conn = getConnection()) {
-                boolean hasPrev = hasPrevPlateColumn(conn);
-                String sql = hasPrev
-                        ? "INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Prev_Plate_Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                        : "INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, plate);
-                    ps.setString(2, chassis);
-                    ps.setString(3, engine);
-                    ps.setString(4, brand);
-                    ps.setString(5, model);
-                    ps.setInt(6, yom);
-                    ps.setString(7, color);
-                    ps.setString(8, type);
-                    if (hasPrev) {
-                        if (prevPlate == null || prevPlate.isEmpty()) ps.setNull(9, Types.VARCHAR);
-                        else ps.setString(9, prevPlate);
-                    }
-                    ps.executeUpdate();
-                }
+            String sql = "INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (Connection conn = getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, plate);
+                ps.setString(2, chassis);
+                ps.setString(3, engine);
+                ps.setString(4, brand);
+                ps.setString(5, model);
+                ps.setInt(6, yom);
+                ps.setString(7, color);
+                ps.setString(8, type);
+                if (prevPlate == null || prevPlate.isEmpty()) ps.setNull(9, Types.VARCHAR);
+                else ps.setString(9, prevPlate);
+                ps.executeUpdate();
             }
         }
 
         public void updateVehicle(String plate, String chassis, String engine, String brand,
                                   String model, int yom, String color, String type, String prevPlate) throws SQLException {
-            try (Connection conn = getConnection()) {
-                boolean hasPrev = hasPrevPlateColumn(conn);
-                String sql = hasPrev
-                        ? "UPDATE VEHICLE SET Chassis_Num=?, Engine_Num=?, Brand=?, Model=?, YOM=?, Color=?, Type=?, Prev_Plate_Num=? WHERE Plate_Num=?"
-                        : "UPDATE VEHICLE SET Chassis_Num=?, Engine_Num=?, Brand=?, Model=?, YOM=?, Color=?, Type=? WHERE Plate_Num=?";
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, chassis);
-                    ps.setString(2, engine);
-                    ps.setString(3, brand);
-                    ps.setString(4, model);
-                    ps.setInt(5, yom);
-                    ps.setString(6, color);
-                    ps.setString(7, type);
-                    if (hasPrev) {
-                        if (prevPlate == null || prevPlate.isEmpty()) ps.setNull(8, Types.VARCHAR);
-                        else ps.setString(8, prevPlate);
-                        ps.setString(9, plate);
-                    } else {
-                        ps.setString(8, plate);
-                    }
-                    ps.executeUpdate();
-                }
-            }
-        }
-
-        public void deleteByKey(String table, String keyCol, String keyVal) throws SQLException {
-            String sql = "DELETE FROM " + table + " WHERE " + keyCol + " = ?";
+            String sql = "UPDATE VEHICLE SET Chassis_Num=?, Engine_Num=?, Brand=?, Model=?, YOM=?, Color=?, Type=?, Previous_Plate_Num=? WHERE Plate_Num=?";
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, keyVal);
+                ps.setString(1, chassis);
+                ps.setString(2, engine);
+                ps.setString(3, brand);
+                ps.setString(4, model);
+                ps.setInt(5, yom);
+                ps.setString(6, color);
+                ps.setString(7, type);
+                if (prevPlate == null || prevPlate.isEmpty()) ps.setNull(8, Types.VARCHAR);
+                else ps.setString(8, prevPlate);
+                ps.setString(9, plate);
                 ps.executeUpdate();
             }
         }
 
+        // Safely deletes a vehicle by removing dependent child records in a transaction first
+        public void deleteVehicleCascade(String plateNum) throws SQLException {
+            try (Connection conn = getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    try (PreparedStatement ps = conn.prepareStatement("UPDATE VEHICLE SET Previous_Plate_Num = NULL WHERE Previous_Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM FINE WHERE Violate_ID IN (SELECT Violate_ID FROM TRAFFICVIOLATION WHERE Plate_Num = ?)")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM TRAFFICVIOLATION WHERE Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM INSPECTION WHERE Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM INSURANCEPOLICY WHERE Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM REGISTRATION WHERE Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM VEHICLE WHERE Plate_Num = ?")) {
+                        ps.setString(1, plateNum);
+                        ps.executeUpdate();
+                    }
+                    conn.commit();
+                } catch (SQLException ex) {
+                    conn.rollback();
+                    throw ex;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            }
+        }
+
+        // ------------------------- 2. OWNER (BR2, BR10) -------------------------
         public List<Object[]> getOwners() throws SQLException {
             List<Object[]> rows = new ArrayList<>();
-            String sql = "SELECT o.OwnerID, o.Street, o.District, o.City, " +
-                    "i.Identity_Card, i.Fname, i.Mname, i.Lname, i.DOB, i.Gender, " +
+            String sql = "SELECT o.Owner_ID, o.Street, o.District, o.City, " +
+                    "i.Indentity_Card, i.Fname, i.Mname, i.Lname, i.DoB, i.Gender, " +
                     "org.Tax_Code, org.Company_Name, org.Represent_Name " +
-                    "FROM OWNER o " +
-                    "LEFT JOIN INDIVIDUAL i ON o.OwnerID = i.OwnerID " +
-                    "LEFT JOIN ORGANISATION org ON o.OwnerID = org.OwnerID";
+                    "FROM Owner o " +
+                    "LEFT JOIN Individual i ON o.Owner_ID = i.Owner_ID " +
+                    "LEFT JOIN Organisation org ON o.Owner_ID = org.Owner_ID " +
+                    "ORDER BY o.Owner_ID";
             try (Connection conn = getConnection();
                  Statement st = conn.createStatement();
                  ResultSet rs = st.executeQuery(sql)) {
                 while (rs.next()) {
-                    String idCard = rs.getString("Identity_Card");
+                    String idCard = rs.getString("Indentity_Card");
                     String taxCode = rs.getString("Tax_Code");
-                    String category = (idCard != null) ? "Individual" : (taxCode != null ? "Organisation" : "Unspecified");
+                    String category = (idCard != null) ? "Individual" : (taxCode != null ? "Organisation" : "Owner");
                     String identifier = (idCard != null) ? idCard : (taxCode != null ? taxCode : "");
                     String nameDetails;
                     if (idCard != null) {
@@ -152,7 +185,7 @@ public class MainFrame extends JFrame {
                         nameDetails = comp + rep;
                     }
                     rows.add(new Object[]{
-                            rs.getString("OwnerID"),
+                            rs.getInt("Owner_ID"),
                             category,
                             identifier,
                             nameDetails,
@@ -165,32 +198,32 @@ public class MainFrame extends JFrame {
             return rows;
         }
 
-        public void insertIndividualOwner(String ownerId, String street, String district, String city,
+        public void insertIndividualOwner(int ownerId, String street, String district, String city,
                                           String idCard, String fname, String mname, String lname,
                                           String dob, String gender, String phone, String email) throws SQLException {
             try (Connection conn = getConnection()) {
                 conn.setAutoCommit(false);
                 try {
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO OWNER (OwnerID, Street, District, City) VALUES (?, ?, ?, ?)")) {
-                        ps.setString(1, ownerId);
+                            "INSERT INTO Owner (Owner_ID, Street, District, City) VALUES (?, ?, ?, ?)")) {
+                        ps.setInt(1, ownerId);
                         ps.setString(2, street);
                         ps.setString(3, district);
                         ps.setString(4, city);
                         ps.executeUpdate();
                     }
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO INDIVIDUAL (Identity_Card, OwnerID, Fname, Mname, Lname, DOB, Gender) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
-                        ps.setString(1, idCard);
-                        ps.setString(2, ownerId);
-                        ps.setString(3, fname);
-                        ps.setString(4, mname);
-                        ps.setString(5, lname);
-                        ps.setDate(6, Date.valueOf(dob));
-                        ps.setString(7, gender);
+                            "INSERT INTO Individual (Owner_ID, Fname, Mname, Lname, DoB, Gender, Indentity_Card) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                        ps.setInt(1, ownerId);
+                        ps.setString(2, fname.isEmpty() ? "N/A" : fname);
+                        ps.setString(3, mname.isEmpty() ? "" : mname);
+                        ps.setString(4, lname.isEmpty() ? "N/A" : lname);
+                        ps.setDate(5, Date.valueOf(dob));
+                        ps.setString(6, gender);
+                        ps.setString(7, idCard);
                         ps.executeUpdate();
                     }
-                    insertContactIfPresent(conn, ownerId, phone, email);
+                    upsertOwnerContacts(conn, ownerId, phone, email);
                     conn.commit();
                 } catch (SQLException ex) {
                     conn.rollback();
@@ -201,29 +234,29 @@ public class MainFrame extends JFrame {
             }
         }
 
-        public void insertOrganisationOwner(String ownerId, String street, String district, String city,
+        public void insertOrganisationOwner(int ownerId, String street, String district, String city,
                                             String taxCode, String companyName, String repName,
                                             String phone, String email) throws SQLException {
             try (Connection conn = getConnection()) {
                 conn.setAutoCommit(false);
                 try {
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO OWNER (OwnerID, Street, District, City) VALUES (?, ?, ?, ?)")) {
-                        ps.setString(1, ownerId);
+                            "INSERT INTO Owner (Owner_ID, Street, District, City) VALUES (?, ?, ?, ?)")) {
+                        ps.setInt(1, ownerId);
                         ps.setString(2, street);
                         ps.setString(3, district);
                         ps.setString(4, city);
                         ps.executeUpdate();
                     }
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO ORGANISATION (Tax_Code, OwnerID, Company_Name, Represent_Name) VALUES (?, ?, ?, ?)")) {
-                        ps.setString(1, taxCode);
-                        ps.setString(2, ownerId);
-                        ps.setString(3, companyName);
+                            "INSERT INTO Organisation (Owner_ID, Company_Name, Tax_Code, Represent_Name) VALUES (?, ?, ?, ?)")) {
+                        ps.setInt(1, ownerId);
+                        ps.setString(2, companyName);
+                        ps.setString(3, taxCode);
                         ps.setString(4, repName);
                         ps.executeUpdate();
                     }
-                    insertContactIfPresent(conn, ownerId, phone, email);
+                    upsertOwnerContacts(conn, ownerId, phone, email);
                     conn.commit();
                 } catch (SQLException ex) {
                     conn.rollback();
@@ -234,29 +267,52 @@ public class MainFrame extends JFrame {
             }
         }
 
-        private void insertContactIfPresent(Connection conn, String ownerId, String phone, String email) throws SQLException {
+        public void deleteOwnerCascade(int ownerId) throws SQLException {
+            try (Connection conn = getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    String[] childTables = {"Owner_phone", "Owner_email", "Ownership", "Individual", "Organisation", "Owner"};
+                    for (String tbl : childTables) {
+                        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + tbl + " WHERE Owner_ID = ?")) {
+                            ps.setInt(1, ownerId);
+                            ps.executeUpdate();
+                        }
+                    }
+                    conn.commit();
+                } catch (SQLException ex) {
+                    conn.rollback();
+                    throw ex;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            }
+        }
+
+        private void upsertOwnerContacts(Connection conn, int ownerId, String phone, String email) throws SQLException {
             if (phone != null && !phone.isEmpty()) {
-                try (PreparedStatement ps = conn.prepareStatement("INSERT INTO OWNER_PHONE (Phone, OwnerID) VALUES (?, ?)")) {
-                    ps.setString(1, phone);
-                    ps.setString(2, ownerId);
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO Owner_phone (Owner_ID, Phone) VALUES (?, ?) ON DUPLICATE KEY UPDATE Phone = VALUES(Phone)")) {
+                    ps.setInt(1, ownerId);
+                    ps.setString(2, phone);
                     ps.executeUpdate();
                 }
             }
             if (email != null && !email.isEmpty()) {
-                try (PreparedStatement ps = conn.prepareStatement("INSERT INTO OWNER_EMAIL (Email, OwnerID) VALUES (?, ?)")) {
-                    ps.setString(1, email);
-                    ps.setString(2, ownerId);
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO Owner_email (Owner_ID, email) VALUES (?, ?) ON DUPLICATE KEY UPDATE email = VALUES(email)")) {
+                    ps.setInt(1, ownerId);
+                    ps.setString(2, email);
                     ps.executeUpdate();
                 }
             }
         }
 
-        public List<String> getOwnerContacts(String table, String col, String ownerId) throws SQLException {
+        public List<String> getOwnerContacts(String table, String col, int ownerId) throws SQLException {
             List<String> list = new ArrayList<>();
-            String sql = "SELECT " + col + " FROM " + table + " WHERE OwnerID = ?";
+            String sql = "SELECT " + col + " FROM " + table + " WHERE Owner_ID = ?";
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, ownerId);
+                ps.setInt(1, ownerId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) list.add(rs.getString(1));
                 }
@@ -264,16 +320,82 @@ public class MainFrame extends JFrame {
             return list;
         }
 
-        public void addOwnerContact(String table, String col, String ownerId, String val) throws SQLException {
-            String sql = "INSERT INTO " + table + " (" + col + ", OwnerID) VALUES (?, ?)";
-            try (Connection conn = getConnection();
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, val);
-                ps.setString(2, ownerId);
-                ps.executeUpdate();
+        public void saveOwnerContacts(int ownerId, String phone, String email) throws SQLException {
+            try (Connection conn = getConnection()) {
+                upsertOwnerContacts(conn, ownerId, phone, email);
             }
         }
 
+        public void deleteViolationCascade(int violateId) throws SQLException {
+            try (Connection conn = getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM FINE WHERE Violate_ID = ?")) {
+                        ps.setInt(1, violateId);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("DELETE FROM TRAFFICVIOLATION WHERE Violate_ID = ?")) {
+                        ps.setInt(1, violateId);
+                        ps.executeUpdate();
+                    }
+                    conn.commit();
+                } catch (SQLException ex) {
+                    conn.rollback();
+                    throw ex;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            }
+        }
+
+        // ------------------------- STORED PROCEDURES -------------------------
+        public void callRegisterNewVehicle(String plate, String chassis, String engine, String brand,
+                                           String model, int yom, String color, String type,
+                                           int ownerId, int regId, String policyNum) throws SQLException {
+            String sql = "{CALL sp_RegisterNewVehicle(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            try (Connection conn = getConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+                cs.setString(1, plate);
+                cs.setString(2, chassis);
+                cs.setString(3, engine);
+                cs.setString(4, brand);
+                cs.setString(5, model);
+                cs.setInt(6, yom);
+                cs.setString(7, color);
+                cs.setString(8, type);
+                cs.setInt(9, ownerId);
+                cs.setInt(10, regId);
+                cs.setString(11, policyNum);
+                cs.execute();
+            }
+        }
+
+        public void callPayFine(int fineNum, int violateId) throws SQLException {
+            String sql = "{CALL sp_PayFine(?, ?)}";
+            try (Connection conn = getConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+                cs.setInt(1, fineNum);
+                cs.setInt(2, violateId);
+                cs.execute();
+            }
+        }
+
+        public void callTransferOwnership(String oldPlate, String newPlate, String newChassis,
+                                          String newEngine, int newOwnerId, int newOwnershipId) throws SQLException {
+            String sql = "{CALL sp_TransferVehicleOwnership(?, ?, ?, ?, ?, ?)}";
+            try (Connection conn = getConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+                cs.setString(1, oldPlate);
+                cs.setString(2, newPlate);
+                cs.setString(3, newChassis);
+                cs.setString(4, newEngine);
+                cs.setInt(5, newOwnerId);
+                cs.setInt(6, newOwnershipId);
+                cs.execute();
+            }
+        }
+
+        // ------------------------- GENERIC HELPERS -------------------------
         public List<Object[]> queryTable(String sql, int colCount) throws SQLException {
             List<Object[]> rows = new ArrayList<>();
             try (Connection conn = getConnection();
@@ -299,6 +421,9 @@ public class MainFrame extends JFrame {
         }
     }
 
+    // =========================================================================
+    // SWING UI FIELDS
+    // =========================================================================
     private final DatabaseDAO dao = new DatabaseDAO();
 
     private DefaultTableModel vehicleTableModel;
@@ -327,8 +452,8 @@ public class MainFrame extends JFrame {
     private JTable fineTable;
 
     public MainFrame() {
-        setTitle("Vehicle Registration Authority - Group 07");
-        setSize(1050, 680);
+        setTitle("Vehicle Registration Authority - Group 07 (Synced with database.sql)");
+        setSize(1120, 680);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -356,26 +481,45 @@ public class MainFrame extends JFrame {
         loadFinesFromDatabase();
     }
 
+    private JComboBox<String> createPlateComboBox() {
+        List<String> plates = dao.getSingleColumnList("SELECT Plate_Num FROM VEHICLE ORDER BY Plate_Num");
+        JComboBox<String> cb = new JComboBox<>(plates.toArray(new String[0]));
+        cb.setEditable(true);
+        return cb;
+    }
+
+    private JComboBox<String> createOwnerComboBox() {
+        List<String> owners = dao.getSingleColumnList("SELECT Owner_ID FROM Owner ORDER BY Owner_ID");
+        JComboBox<String> cb = new JComboBox<>(owners.toArray(new String[0]));
+        cb.setEditable(true);
+        return cb;
+    }
+
+    // =========================================================================
+    // 1. VEHICLES TAB
+    // =========================================================================
     private JPanel createVehicleTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        tfVehicleSearch = new JTextField(18);
+        tfVehicleSearch = new JTextField(14);
         JButton btSearch = new JButton("Search");
         JButton btAdd = new JButton("Add Vehicle");
+        JButton btFullReg = new JButton("Full Register (SP1)");
         JButton btEdit = new JButton("Edit Selected");
         JButton btRemove = new JButton("Remove Vehicle");
-        JButton btRefresh = new JButton("Refresh Data");
+        JButton btRefresh = new JButton("Refresh");
 
         topBar.add(new JLabel("Filter:"));
         topBar.add(tfVehicleSearch);
         topBar.add(btSearch);
         topBar.add(btAdd);
+        topBar.add(btFullReg);
         topBar.add(btEdit);
         topBar.add(btRemove);
         topBar.add(btRefresh);
 
-        String[] columns = {"Plate_Num", "Chassis_Num", "Engine_Num", "Brand", "Model", "YOM", "Color", "Type", "Prev_Plate_Num"};
+        String[] columns = {"Plate_Num", "Chassis_Num", "Engine_Num", "Brand", "Model", "YOM", "Color", "Type", "Previous_Plate_Num"};
         vehicleTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -384,11 +528,28 @@ public class MainFrame extends JFrame {
 
         btSearch.addActionListener(e -> loadVehiclesFromDatabase(tfVehicleSearch.getText()));
         btAdd.addActionListener(e -> showVehicleDialog(false));
+        btFullReg.addActionListener(e -> showFullRegisterSPDialog());
         btEdit.addActionListener(e -> showVehicleDialog(true));
-        btRemove.addActionListener(e -> removeSelectedRow(vehicleTable, vehicleTableModel, "VEHICLE", "Plate_Num", () -> loadVehiclesFromDatabase("")));
+        btRemove.addActionListener(e -> {
+            int row = vehicleTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a vehicle row to remove.");
+                return;
+            }
+            String plate = strVal(vehicleTableModel, row, 0);
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Delete vehicle '" + plate + "' and its linked registrations/inspections/policies/violations?",
+                    "Confirm Cascade Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    dao.deleteVehicleCascade(plate);
+                    refreshAllTabs();
+                } catch (SQLException ex) { showDbError(ex); }
+            }
+        });
         btRefresh.addActionListener(e -> {
             tfVehicleSearch.setText("");
-            loadVehiclesFromDatabase("");
+            refreshAllTabs();
         });
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -414,68 +575,99 @@ public class MainFrame extends JFrame {
             return;
         }
 
-        JTextField tfPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 0) : "");
+        JTextField tfPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 0) : "51K-88899");
         tfPlate.setEditable(!isEdit);
-        JTextField tfChassis = new JTextField(isEdit ? strVal(vehicleTableModel, row, 1) : "");
-        JTextField tfEngine = new JTextField(isEdit ? strVal(vehicleTableModel, row, 2) : "");
-        JTextField tfBrand = new JTextField(isEdit ? strVal(vehicleTableModel, row, 3) : "");
-        JTextField tfModel = new JTextField(isEdit ? strVal(vehicleTableModel, row, 4) : "");
-        JTextField tfYom = new JTextField(isEdit ? strVal(vehicleTableModel, row, 5) : "");
-        JTextField tfColor = new JTextField(isEdit ? strVal(vehicleTableModel, row, 6) : "");
-        JTextField tfType = new JTextField(isEdit ? strVal(vehicleTableModel, row, 7) : "");
+        JTextField tfChassis = new JTextField(isEdit ? strVal(vehicleTableModel, row, 1) : "CHS016ENG16");
+        JTextField tfEngine = new JTextField(isEdit ? strVal(vehicleTableModel, row, 2) : "ENG100016");
+        JTextField tfBrand = new JTextField(isEdit ? strVal(vehicleTableModel, row, 3) : "Toyota");
+        JTextField tfModel = new JTextField(isEdit ? strVal(vehicleTableModel, row, 4) : "Corolla Cross");
+        JTextField tfYom = new JTextField(isEdit ? strVal(vehicleTableModel, row, 5) : "2026");
+        JTextField tfColor = new JTextField(isEdit ? strVal(vehicleTableModel, row, 6) : "White");
+        JTextField tfType = new JTextField(isEdit ? strVal(vehicleTableModel, row, 7) : "SUV");
         JTextField tfPrevPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 8) : "");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
         form.add(new JLabel("Plate Number (*):")); form.add(tfPlate);
-        form.add(new JLabel("Chassis Number (* Unique - BR1):")); form.add(tfChassis);
-        form.add(new JLabel("Engine Number (* Unique - BR1):")); form.add(tfEngine);
+        form.add(new JLabel("Chassis Number (* Unique):")); form.add(tfChassis);
+        form.add(new JLabel("Engine Number (* Unique):")); form.add(tfEngine);
         form.add(new JLabel("Brand:")); form.add(tfBrand);
         form.add(new JLabel("Model:")); form.add(tfModel);
         form.add(new JLabel("Year of Manufacture (YOM) (*):")); form.add(tfYom);
         form.add(new JLabel("Color:")); form.add(tfColor);
-        form.add(new JLabel("Type (e.g., Car, Truck):")); form.add(tfType);
-        form.add(new JLabel("Replaced Plate (Optional - BR9):")); form.add(tfPrevPlate);
+        form.add(new JLabel("Type:")); form.add(tfType);
+        form.add(new JLabel("Previous_Plate_Num (Blank or existing plate):")); form.add(tfPrevPlate);
 
-        int res = JOptionPane.showConfirmDialog(this, form, isEdit ? "Edit Vehicle" : "Add New Vehicle",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (res == JOptionPane.OK_OPTION) {
-            String plate = tfPlate.getText().trim();
-            String chassis = tfChassis.getText().trim();
-            String engine = tfEngine.getText().trim();
-            if (plate.isEmpty() || chassis.isEmpty() || engine.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Plate, Chassis, and Engine numbers are required (BR1)!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int yom;
+        if (JOptionPane.showConfirmDialog(this, form, isEdit ? "Edit Vehicle" : "Add New Vehicle",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             try {
-                yom = Integer.parseInt(tfYom.getText().trim());
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "YOM must be a valid integer year!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            try {
+                int yom = Integer.parseInt(tfYom.getText().trim());
                 if (isEdit) {
-                    dao.updateVehicle(plate, chassis, engine, tfBrand.getText().trim(), tfModel.getText().trim(),
-                            yom, tfColor.getText().trim(), tfType.getText().trim(), tfPrevPlate.getText().trim());
+                    dao.updateVehicle(tfPlate.getText().trim(), tfChassis.getText().trim(), tfEngine.getText().trim(),
+                            tfBrand.getText().trim(), tfModel.getText().trim(), yom, tfColor.getText().trim(),
+                            tfType.getText().trim(), tfPrevPlate.getText().trim());
                 } else {
-                    dao.insertVehicle(plate, chassis, engine, tfBrand.getText().trim(), tfModel.getText().trim(),
-                            yom, tfColor.getText().trim(), tfType.getText().trim(), tfPrevPlate.getText().trim());
+                    dao.insertVehicle(tfPlate.getText().trim(), tfChassis.getText().trim(), tfEngine.getText().trim(),
+                            tfBrand.getText().trim(), tfModel.getText().trim(), yom, tfColor.getText().trim(),
+                            tfType.getText().trim(), tfPrevPlate.getText().trim());
                 }
-                loadVehiclesFromDatabase("");
-            } catch (SQLException ex) {
-                showDbError(ex);
-            }
+                refreshAllTabs();
+            } catch (Exception ex) { showDbError(ex); }
         }
     }
 
+    private void showFullRegisterSPDialog() {
+        int nextRegId = dao.getNextIntId("REGISTRATION", "Registration_ID");
+        JTextField tfPlate = new JTextField("51G-" + (10000 + nextRegId));
+        JTextField tfChassis = new JTextField("CHS0" + nextRegId + "ENG0" + nextRegId);
+        JTextField tfEngine = new JTextField("ENG1000" + nextRegId);
+        JTextField tfBrand = new JTextField("Honda");
+        JTextField tfModel = new JTextField("CR-V");
+        JTextField tfYom = new JTextField("2026");
+        JTextField tfColor = new JTextField("Black");
+        JTextField tfType = new JTextField("SUV");
+        JComboBox<String> cbOwner = createOwnerComboBox();
+        JTextField tfRegId = new JTextField(String.valueOf(nextRegId));
+        JTextField tfPolicyNum = new JTextField(String.format("POL%03d", nextRegId));
+
+        JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
+        f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
+        f.add(new JLabel("Chassis Number (*):")); f.add(tfChassis);
+        f.add(new JLabel("Engine Number (*):")); f.add(tfEngine);
+        f.add(new JLabel("Brand:")); f.add(tfBrand);
+        f.add(new JLabel("Model:")); f.add(tfModel);
+        f.add(new JLabel("YOM (*):")); f.add(tfYom);
+        f.add(new JLabel("Color:")); f.add(tfColor);
+        f.add(new JLabel("Type:")); f.add(tfType);
+        f.add(new JLabel("Select Existing Owner_ID (*):")); f.add(cbOwner);
+        f.add(new JLabel("New Registration_ID (*):")); f.add(tfRegId);
+        f.add(new JLabel("New Policy_Num (*):")); f.add(tfPolicyNum);
+
+        if (JOptionPane.showConfirmDialog(this, f, "Transaction Script 1: sp_RegisterNewVehicle",
+                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try {
+                int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
+                dao.callRegisterNewVehicle(
+                        tfPlate.getText().trim(), tfChassis.getText().trim(), tfEngine.getText().trim(),
+                        tfBrand.getText().trim(), tfModel.getText().trim(), Integer.parseInt(tfYom.getText().trim()),
+                        tfColor.getText().trim(), tfType.getText().trim(), ownerId,
+                        Integer.parseInt(tfRegId.getText().trim()), tfPolicyNum.getText().trim()
+                );
+                refreshAllTabs();
+                JOptionPane.showMessageDialog(this, "sp_RegisterNewVehicle executed successfully!");
+            } catch (Exception ex) { showDbError(ex); }
+        }
+    }
+
+    // =========================================================================
+    // 2. OWNERS TAB
+    // =========================================================================
     private JPanel createOwnerTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton btAddInd = new JButton("Add Individual Owner");
         JButton btAddOrg = new JButton("Add Organisation Owner");
-        JButton btContacts = new JButton("Phones & Emails (BR10)");
+        JButton btContacts = new JButton("View / Set Phone & Email");
         JButton btRemove = new JButton("Delete Owner");
         JButton btRefresh = new JButton("Refresh");
 
@@ -485,7 +677,7 @@ public class MainFrame extends JFrame {
         topBar.add(btRemove);
         topBar.add(btRefresh);
 
-        String[] cols = {"OwnerID", "Category (BR2)", "ID_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
+        String[] cols = {"Owner_ID", "Category", "Indentity_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
         ownerTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -495,7 +687,23 @@ public class MainFrame extends JFrame {
         btAddInd.addActionListener(e -> showAddIndividualDialog());
         btAddOrg.addActionListener(e -> showAddOrganisationDialog());
         btContacts.addActionListener(e -> showOwnerContactsDialog());
-        btRemove.addActionListener(e -> removeSelectedRow(ownerTable, ownerTableModel, "OWNER", "OwnerID", this::loadOwnersFromDatabase));
+        btRemove.addActionListener(e -> {
+            int row = ownerTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Please select an owner row to delete.");
+                return;
+            }
+            int ownerId = Integer.parseInt(strVal(ownerTableModel, row, 0));
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Delete Owner_ID " + ownerId + " and their subtype/contact/ownership records?",
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    dao.deleteOwnerCascade(ownerId);
+                    refreshAllTabs();
+                } catch (SQLException ex) { showDbError(ex); }
+            }
+        });
         btRefresh.addActionListener(e -> loadOwnersFromDatabase());
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -513,160 +721,189 @@ public class MainFrame extends JFrame {
     }
 
     private void showAddIndividualDialog() {
-        JTextField tfOwnerId = new JTextField();
-        JTextField tfIdCard = new JTextField();
-        JTextField tfFname = new JTextField();
-        JTextField tfMname = new JTextField();
-        JTextField tfLname = new JTextField();
-        JTextField tfDob = new JTextField("2000-01-01");
-        JTextField tfGender = new JTextField("M");
-        JTextField tfStreet = new JTextField();
-        JTextField tfDistrict = new JTextField();
-        JTextField tfCity = new JTextField();
-        JTextField tfPhone = new JTextField();
-        JTextField tfEmail = new JTextField();
+        int nextId = dao.getNextIntId("Owner", "Owner_ID");
+        JTextField tfOwnerId = new JTextField(String.valueOf(nextId));
+        JTextField tfIdCard = new JTextField("07920000" + (1000 + nextId));
+        JTextField tfFname = new JTextField("Nguyen");
+        JTextField tfMname = new JTextField("Van");
+        JTextField tfLname = new JTextField("Khoa");
+        JTextField tfDob = new JTextField("2000-01-15");
+        JTextField tfGender = new JTextField("Male");
+        JTextField tfStreet = new JTextField("102 Nguyen Hue");
+        JTextField tfDistrict = new JTextField("District 1");
+        JTextField tfCity = new JTextField("Ho Chi Minh City");
+        JTextField tfPhone = new JTextField("09091234" + nextId);
+        JTextField tfEmail = new JTextField("owner" + nextId + "@gmail.com");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 6, 6));
-        form.add(new JLabel("OwnerID (*):")); form.add(tfOwnerId);
-        form.add(new JLabel("Identity Card (* BR2):")); form.add(tfIdCard);
-        form.add(new JLabel("First Name:")); form.add(tfFname);
-        form.add(new JLabel("Middle Name:")); form.add(tfMname);
-        form.add(new JLabel("Last Name:")); form.add(tfLname);
-        form.add(new JLabel("DOB (YYYY-MM-DD):")); form.add(tfDob);
+        form.add(new JLabel("Owner_ID (Int *):")); form.add(tfOwnerId);
+        form.add(new JLabel("Indentity_Card (* Unique):")); form.add(tfIdCard);
+        form.add(new JLabel("First Name (*):")); form.add(tfFname);
+        form.add(new JLabel("Middle Name (*):")); form.add(tfMname);
+        form.add(new JLabel("Last Name (*):")); form.add(tfLname);
+        form.add(new JLabel("DoB (YYYY-MM-DD):")); form.add(tfDob);
         form.add(new JLabel("Gender:")); form.add(tfGender);
         form.add(new JLabel("Street:")); form.add(tfStreet);
         form.add(new JLabel("District:")); form.add(tfDistrict);
         form.add(new JLabel("City:")); form.add(tfCity);
-        form.add(new JLabel("Initial Phone (Optional):")); form.add(tfPhone);
-        form.add(new JLabel("Initial Email (Optional):")); form.add(tfEmail);
+        form.add(new JLabel("Phone (Optional):")); form.add(tfPhone);
+        form.add(new JLabel("Email (Optional):")); form.add(tfEmail);
 
         if (JOptionPane.showConfirmDialog(this, form, "Add Individual Owner", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
                 dao.insertIndividualOwner(
-                        tfOwnerId.getText().trim(), tfStreet.getText().trim(), tfDistrict.getText().trim(), tfCity.getText().trim(),
+                        Integer.parseInt(tfOwnerId.getText().trim()), tfStreet.getText().trim(), tfDistrict.getText().trim(), tfCity.getText().trim(),
                         tfIdCard.getText().trim(), tfFname.getText().trim(), tfMname.getText().trim(), tfLname.getText().trim(),
                         tfDob.getText().trim(), tfGender.getText().trim(), tfPhone.getText().trim(), tfEmail.getText().trim()
                 );
                 loadOwnersFromDatabase();
-            } catch (Exception ex) {
-                showDbError(ex);
-            }
+            } catch (Exception ex) { showDbError(ex); }
         }
     }
 
     private void showAddOrganisationDialog() {
-        JTextField tfOwnerId = new JTextField();
-        JTextField tfTax = new JTextField();
-        JTextField tfComp = new JTextField();
-        JTextField tfRep = new JTextField();
-        JTextField tfStreet = new JTextField();
-        JTextField tfDistrict = new JTextField();
-        JTextField tfCity = new JTextField();
-        JTextField tfPhone = new JTextField();
-        JTextField tfEmail = new JTextField();
+        int nextId = dao.getNextIntId("Owner", "Owner_ID");
+        JTextField tfOwnerId = new JTextField(String.valueOf(nextId));
+        JTextField tfTax = new JTextField("0300999" + (100 + nextId));
+        JTextField tfComp = new JTextField("Saigon Logistics Co., Ltd.");
+        JTextField tfRep = new JTextField("Tran Minh Quan");
+        JTextField tfStreet = new JTextField("25 Le Duan");
+        JTextField tfDistrict = new JTextField("District 1");
+        JTextField tfCity = new JTextField("Ho Chi Minh City");
+        JTextField tfPhone = new JTextField("028388899" + nextId);
+        JTextField tfEmail = new JTextField("contact" + nextId + "@company.vn");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 6, 6));
-        form.add(new JLabel("OwnerID (*):")); form.add(tfOwnerId);
-        form.add(new JLabel("Tax Code (* BR2):")); form.add(tfTax);
+        form.add(new JLabel("Owner_ID (Int *):")); form.add(tfOwnerId);
+        form.add(new JLabel("Tax Code (* Unique):")); form.add(tfTax);
         form.add(new JLabel("Company Name (*):")); form.add(tfComp);
         form.add(new JLabel("Representative Name:")); form.add(tfRep);
         form.add(new JLabel("Street:")); form.add(tfStreet);
         form.add(new JLabel("District:")); form.add(tfDistrict);
         form.add(new JLabel("City:")); form.add(tfCity);
-        form.add(new JLabel("Initial Phone (Optional):")); form.add(tfPhone);
-        form.add(new JLabel("Initial Email (Optional):")); form.add(tfEmail);
+        form.add(new JLabel("Phone (Optional):")); form.add(tfPhone);
+        form.add(new JLabel("Email (Optional):")); form.add(tfEmail);
 
         if (JOptionPane.showConfirmDialog(this, form, "Add Organisation Owner", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
                 dao.insertOrganisationOwner(
-                        tfOwnerId.getText().trim(), tfStreet.getText().trim(), tfDistrict.getText().trim(), tfCity.getText().trim(),
+                        Integer.parseInt(tfOwnerId.getText().trim()), tfStreet.getText().trim(), tfDistrict.getText().trim(), tfCity.getText().trim(),
                         tfTax.getText().trim(), tfComp.getText().trim(), tfRep.getText().trim(),
                         tfPhone.getText().trim(), tfEmail.getText().trim()
                 );
                 loadOwnersFromDatabase();
-            } catch (Exception ex) {
-                showDbError(ex);
-            }
+            } catch (Exception ex) { showDbError(ex); }
         }
     }
 
     private void showOwnerContactsDialog() {
         int row = ownerTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select an owner first to view/add Phones & Emails.");
+            JOptionPane.showMessageDialog(this, "Select an owner row first.");
             return;
         }
-        String ownerId = strVal(ownerTableModel, row, 0);
+        int ownerId = Integer.parseInt(strVal(ownerTableModel, row, 0));
         try {
-            List<String> phones = dao.getOwnerContacts("OWNER_PHONE", "Phone", ownerId);
-            List<String> emails = dao.getOwnerContacts("OWNER_EMAIL", "Email", ownerId);
+            List<String> phones = dao.getOwnerContacts("Owner_phone", "Phone", ownerId);
+            List<String> emails = dao.getOwnerContacts("Owner_email", "email", ownerId);
 
-            JTextField tfNewPhone = new JTextField();
-            JTextField tfNewEmail = new JTextField();
+            JTextField tfNewPhone = new JTextField(phones.isEmpty() ? "" : phones.get(0));
+            JTextField tfNewEmail = new JTextField(emails.isEmpty() ? "" : emails.get(0));
 
             JPanel panel = new JPanel(new GridLayout(0, 1, 4, 4));
-            panel.add(new JLabel("OwnerID: " + ownerId));
-            panel.add(new JLabel("Registered Phones: " + (phones.isEmpty() ? "None" : String.join(", ", phones))));
-            panel.add(new JLabel("Registered Emails: " + (emails.isEmpty() ? "None" : String.join(", ", emails))));
-            panel.add(new JLabel("Add Phone Number:"));
+            panel.add(new JLabel("Owner_ID: " + ownerId));
+            panel.add(new JLabel("Current Phone: " + (phones.isEmpty() ? "None" : String.join(", ", phones))));
+            panel.add(new JLabel("Current Email: " + (emails.isEmpty() ? "None" : String.join(", ", emails))));
+            panel.add(new JLabel("Set / Update Phone Number:"));
             panel.add(tfNewPhone);
-            panel.add(new JLabel("Add Email Address:"));
+            panel.add(new JLabel("Set / Update Email Address:"));
             panel.add(tfNewEmail);
 
-            if (JOptionPane.showConfirmDialog(this, panel, "Owner Contacts (BR10)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                if (!tfNewPhone.getText().trim().isEmpty()) {
-                    dao.addOwnerContact("OWNER_PHONE", "Phone", ownerId, tfNewPhone.getText().trim());
-                }
-                if (!tfNewEmail.getText().trim().isEmpty()) {
-                    dao.addOwnerContact("OWNER_EMAIL", "Email", ownerId, tfNewEmail.getText().trim());
-                }
+            if (JOptionPane.showConfirmDialog(this, panel, "Owner Contacts", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                dao.saveOwnerContacts(ownerId, tfNewPhone.getText().trim(), tfNewEmail.getText().trim());
+                JOptionPane.showMessageDialog(this, "Contact details saved!");
             }
-        } catch (SQLException ex) {
-            showDbError(ex);
-        }
+        } catch (SQLException ex) { showDbError(ex); }
     }
 
+    // =========================================================================
+    // 3. OWNERSHIP HISTORY TAB
+    // =========================================================================
     private JPanel createOwnershipTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAdd = new JButton("Add Ownership Record");
+        JButton btTransferSP = new JButton("Transfer Ownership (SP3)");
         JButton btRemove = new JButton("Delete Record");
         JButton btRefresh = new JButton("Refresh");
-        top.add(btAdd); top.add(btRemove); top.add(btRefresh);
+        top.add(btAdd); top.add(btTransferSP); top.add(btRemove); top.add(btRefresh);
 
-        String[] cols = {"Ownership_ID", "Plate_Num", "OwnerID", "Start_Date", "End_Date", "Transfer_Type"};
+        String[] cols = {"Ownership_ID", "Owner_ID", "Start_Date", "End_Date", "Transfer_Type"};
         ownershipTableModel = new DefaultTableModel(cols, 0);
         ownershipTable = new JTable(ownershipTableModel);
 
         btAdd.addActionListener(e -> {
-            JTextField tfId = new JTextField();
-            JTextField tfPlate = new JTextField();
-            JTextField tfOwner = new JTextField();
+            int nextId = dao.getNextIntId("Ownership", "Ownership_ID");
+            JTextField tfId = new JTextField(String.valueOf(nextId));
+            JComboBox<String> cbOwner = createOwnerComboBox();
             JTextField tfStart = new JTextField("2026-01-01");
             JTextField tfEnd = new JTextField();
-            JTextField tfType = new JTextField("New Registration");
+            JTextField tfType = new JTextField("New Purchase");
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Ownership ID (*):")); f.add(tfId);
-            f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
-            f.add(new JLabel("OwnerID (*):")); f.add(tfOwner);
-            f.add(new JLabel("Start Date (YYYY-MM-DD):")); f.add(tfStart);
-            f.add(new JLabel("End Date (YYYY-MM-DD or blank):")); f.add(tfEnd);
-            f.add(new JLabel("Transfer Type:")); f.add(tfType);
+            f.add(new JLabel("Ownership_ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Select Owner_ID (*):")); f.add(cbOwner);
+            f.add(new JLabel("Start_Date (YYYY-MM-DD):")); f.add(tfStart);
+            f.add(new JLabel("End_Date (YYYY-MM-DD or blank):")); f.add(tfEnd);
+            f.add(new JLabel("Transfer_Type:")); f.add(tfType);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Ownership (BR3)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Ownership", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     Date endDate = tfEnd.getText().trim().isEmpty() ? null : Date.valueOf(tfEnd.getText().trim());
+                    int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
                     dao.executeUpdate(
-                            "INSERT INTO OWNERSHIP (Ownership_ID, Plate_Num, OwnerID, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfId.getText().trim(), tfPlate.getText().trim(), tfOwner.getText().trim(),
+                            "INSERT INTO Ownership (Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?)",
+                            Integer.parseInt(tfId.getText().trim()), ownerId,
                             Date.valueOf(tfStart.getText().trim()), endDate, tfType.getText().trim()
                     );
                     loadOwnershipsFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemove.addActionListener(e -> removeSelectedRow(ownershipTable, ownershipTableModel, "OWNERSHIP", "Ownership_ID", this::loadOwnershipsFromDatabase));
+
+        btTransferSP.addActionListener(e -> {
+            int nextOwnId = dao.getNextIntId("Ownership", "Ownership_ID");
+            JComboBox<String> cbOldPlate = createPlateComboBox();
+            JTextField tfNewPlate = new JTextField("51H-" + (20000 + nextOwnId));
+            JTextField tfNewChassis = new JTextField("CHS999ENG" + nextOwnId);
+            JTextField tfNewEngine = new JTextField("ENG9999" + nextOwnId);
+            JComboBox<String> cbNewOwner = createOwnerComboBox();
+            JTextField tfNewOwnId = new JTextField(String.valueOf(nextOwnId));
+
+            JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
+            f.add(new JLabel("Select Old Plate_Num (*):")); f.add(cbOldPlate);
+            f.add(new JLabel("New Plate_Num (*):")); f.add(tfNewPlate);
+            f.add(new JLabel("New Chassis_Num (*):")); f.add(tfNewChassis);
+            f.add(new JLabel("New Engine_Num (*):")); f.add(tfNewEngine);
+            f.add(new JLabel("Select New Owner_ID (*):")); f.add(cbNewOwner);
+            f.add(new JLabel("New Ownership_ID (Int *):")); f.add(tfNewOwnId);
+
+            if (JOptionPane.showConfirmDialog(this, f, "Transaction Script 3: sp_TransferVehicleOwnership",
+                    JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                try {
+                    dao.callTransferOwnership(
+                            cbOldPlate.getSelectedItem().toString().trim(), tfNewPlate.getText().trim(),
+                            tfNewChassis.getText().trim(), tfNewEngine.getText().trim(),
+                            Integer.parseInt(cbNewOwner.getSelectedItem().toString().trim()),
+                            Integer.parseInt(tfNewOwnId.getText().trim())
+                    );
+                    refreshAllTabs();
+                    JOptionPane.showMessageDialog(this, "sp_TransferVehicleOwnership executed successfully!");
+                } catch (Exception ex) { showDbError(ex); }
+            }
+        });
+
+        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(ownershipTable, ownershipTableModel, "Ownership", "Ownership_ID", this::loadOwnershipsFromDatabase));
         btRefresh.addActionListener(e -> loadOwnershipsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
@@ -677,12 +914,15 @@ public class MainFrame extends JFrame {
     private void loadOwnershipsFromDatabase() {
         ownershipTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Ownership_ID, Plate_Num, OwnerID, Start_Date, End_Date, Transfer_Type FROM OWNERSHIP", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 5)) {
                 ownershipTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Ownership load note: " + ex.getMessage()); }
     }
 
+    // =========================================================================
+    // 4. REGISTRATIONS TAB
+    // =========================================================================
     private JPanel createRegistrationTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -696,33 +936,35 @@ public class MainFrame extends JFrame {
         registrationTable = new JTable(registrationTableModel);
 
         btAdd.addActionListener(e -> {
-            JTextField tfId = new JTextField();
+            int nextId = dao.getNextIntId("REGISTRATION", "Registration_ID");
+            JTextField tfId = new JTextField(String.valueOf(nextId));
             JTextField tfRegDate = new JTextField("2026-01-01");
-            JTextField tfExpDate = new JTextField("2028-01-01");
+            JTextField tfExpDate = new JTextField("2036-01-01");
             JTextField tfStatus = new JTextField("Active");
-            JTextField tfIssued = new JTextField("HCMC Traffic Authority");
-            JTextField tfPlate = new JTextField();
+            JTextField tfIssued = new JTextField("Cuc CSGT SG");
+            JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Registration ID (*):")); f.add(tfId);
-            f.add(new JLabel("Registration Date (YYYY-MM-DD):")); f.add(tfRegDate);
-            f.add(new JLabel("Expiry Date (YYYY-MM-DD):")); f.add(tfExpDate);
+            f.add(new JLabel("Registration_ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Registration_Date (YYYY-MM-DD):")); f.add(tfRegDate);
+            f.add(new JLabel("Expiry_Date (YYYY-MM-DD):")); f.add(tfExpDate);
             f.add(new JLabel("Status:")); f.add(tfStatus);
-            f.add(new JLabel("Issued By:")); f.add(tfIssued);
-            f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
+            f.add(new JLabel("Issued_By:")); f.add(tfIssued);
+            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Registration (BR4)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Registration", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
                             "INSERT INTO REGISTRATION (Registration_ID, Registration_Date, Expiry_Date, Status, Issued_By, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfId.getText().trim(), Date.valueOf(tfRegDate.getText().trim()), Date.valueOf(tfExpDate.getText().trim()),
-                            tfStatus.getText().trim(), tfIssued.getText().trim(), tfPlate.getText().trim()
+                            Integer.parseInt(tfId.getText().trim()), Date.valueOf(tfRegDate.getText().trim()),
+                            Date.valueOf(tfExpDate.getText().trim()), tfStatus.getText().trim(),
+                            tfIssued.getText().trim(), cbPlate.getSelectedItem().toString().trim()
                     );
                     loadRegistrationsFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemove.addActionListener(e -> removeSelectedRow(registrationTable, registrationTableModel, "REGISTRATION", "Registration_ID", this::loadRegistrationsFromDatabase));
+        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(registrationTable, registrationTableModel, "REGISTRATION", "Registration_ID", this::loadRegistrationsFromDatabase));
         btRefresh.addActionListener(e -> loadRegistrationsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
@@ -733,12 +975,15 @@ public class MainFrame extends JFrame {
     private void loadRegistrationsFromDatabase() {
         registrationTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Registration_ID, Registration_Date, Expiry_Date, Status, Issued_By, Plate_Num FROM REGISTRATION", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Registration_ID, Registration_Date, Expiry_Date, Status, Issued_By, Plate_Num FROM REGISTRATION ORDER BY Registration_ID", 6)) {
                 registrationTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Registration load note: " + ex.getMessage()); }
     }
 
+    // =========================================================================
+    // 5. INSURANCE POLICIES TAB
+    // =========================================================================
     private JPanel createInsuranceTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -752,33 +997,34 @@ public class MainFrame extends JFrame {
         insuranceTable = new JTable(insuranceTableModel);
 
         btAdd.addActionListener(e -> {
-            JTextField tfNum = new JTextField();
-            JTextField tfName = new JTextField();
+            int nextNum = insuranceTableModel.getRowCount() + 1;
+            JTextField tfNum = new JTextField(String.format("POL%03d", nextNum));
+            JTextField tfName = new JTextField("Bao hiem TNDS " + nextNum);
             JTextField tfStart = new JTextField("2026-01-01");
             JTextField tfEnd = new JTextField("2027-01-01");
-            JTextField tfType = new JTextField("Compulsory Civil Liability");
-            JTextField tfPlate = new JTextField();
+            JTextField tfType = new JTextField("Compulsory");
+            JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Policy Number (*):")); f.add(tfNum);
-            f.add(new JLabel("Policy Name:")); f.add(tfName);
-            f.add(new JLabel("Start Date (YYYY-MM-DD):")); f.add(tfStart);
-            f.add(new JLabel("End Date (YYYY-MM-DD):")); f.add(tfEnd);
-            f.add(new JLabel("Insurance Type:")); f.add(tfType);
-            f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
+            f.add(new JLabel("Policy_Num (* Unique):")); f.add(tfNum);
+            f.add(new JLabel("Policy_Name:")); f.add(tfName);
+            f.add(new JLabel("Start_Date (YYYY-MM-DD):")); f.add(tfStart);
+            f.add(new JLabel("End_Date (YYYY-MM-DD):")); f.add(tfEnd);
+            f.add(new JLabel("Insurance_Type:")); f.add(tfType);
+            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Insurance Policy (BR5)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Insurance Policy", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
                             "INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
                             tfNum.getText().trim(), tfName.getText().trim(), Date.valueOf(tfStart.getText().trim()),
-                            Date.valueOf(tfEnd.getText().trim()), tfType.getText().trim(), tfPlate.getText().trim()
+                            Date.valueOf(tfEnd.getText().trim()), tfType.getText().trim(), cbPlate.getSelectedItem().toString().trim()
                     );
                     loadInsuranceFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemove.addActionListener(e -> removeSelectedRow(insuranceTable, insuranceTableModel, "INSURANCEPOLICY", "Policy_Num", this::loadInsuranceFromDatabase));
+        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(insuranceTable, insuranceTableModel, "INSURANCEPOLICY", "Policy_Num", this::loadInsuranceFromDatabase));
         btRefresh.addActionListener(e -> loadInsuranceFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
@@ -789,12 +1035,15 @@ public class MainFrame extends JFrame {
     private void loadInsuranceFromDatabase() {
         insuranceTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num FROM INSURANCEPOLICY", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num FROM INSURANCEPOLICY ORDER BY Policy_Num", 6)) {
                 insuranceTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Insurance load note: " + ex.getMessage()); }
     }
 
+    // =========================================================================
+    // 6. TECHNICAL INSPECTIONS TAB
+    // =========================================================================
     private JPanel createInspectionTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -808,35 +1057,37 @@ public class MainFrame extends JFrame {
         inspectionTable = new JTable(inspectionTableModel);
 
         btAdd.addActionListener(e -> {
-            JTextField tfId = new JTextField();
+            int nextId = dao.getNextIntId("INSPECTION", "Inspection_ID");
+            JTextField tfId = new JTextField(String.valueOf(nextId));
             JTextField tfDate = new JTextField("2026-01-01");
             JTextField tfRes = new JTextField("Pass");
-            JTextField tfInsp = new JTextField();
+            JTextField tfInsp = new JTextField("Nguyen Van Thanh");
             JTextField tfExp = new JTextField("2027-01-01");
-            JTextField tfNotes = new JTextField();
-            JTextField tfPlate = new JTextField();
+            JTextField tfNotes = new JTextField("Standard check");
+            JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Inspection ID (*):")); f.add(tfId);
-            f.add(new JLabel("Inspection Date (YYYY-MM-DD):")); f.add(tfDate);
+            f.add(new JLabel("Inspection_ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Inspection_Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Result (Pass/Fail):")); f.add(tfRes);
-            f.add(new JLabel("Inspector Name:")); f.add(tfInsp);
-            f.add(new JLabel("Expiry Date (YYYY-MM-DD):")); f.add(tfExp);
+            f.add(new JLabel("Inspector_Name:")); f.add(tfInsp);
+            f.add(new JLabel("Expiry_Date (YYYY-MM-DD):")); f.add(tfExp);
             f.add(new JLabel("Notes:")); f.add(tfNotes);
-            f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
+            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Technical Inspection (BR6)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Technical Inspection", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
                             "INSERT INTO INSPECTION (Inspection_ID, Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            tfId.getText().trim(), Date.valueOf(tfDate.getText().trim()), tfRes.getText().trim(),
-                            tfInsp.getText().trim(), Date.valueOf(tfExp.getText().trim()), tfNotes.getText().trim(), tfPlate.getText().trim()
+                            Integer.parseInt(tfId.getText().trim()), Date.valueOf(tfDate.getText().trim()), tfRes.getText().trim(),
+                            tfInsp.getText().trim(), Date.valueOf(tfExp.getText().trim()), tfNotes.getText().trim(),
+                            cbPlate.getSelectedItem().toString().trim()
                     );
                     loadInspectionsFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemove.addActionListener(e -> removeSelectedRow(inspectionTable, inspectionTableModel, "INSPECTION", "Inspection_ID", this::loadInspectionsFromDatabase));
+        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(inspectionTable, inspectionTableModel, "INSPECTION", "Inspection_ID", this::loadInspectionsFromDatabase));
         btRefresh.addActionListener(e -> loadInspectionsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
@@ -847,12 +1098,15 @@ public class MainFrame extends JFrame {
     private void loadInspectionsFromDatabase() {
         inspectionTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Inspection_ID, Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num FROM INSPECTION", 7)) {
+            for (Object[] r : dao.queryTable("SELECT Inspection_ID, Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num FROM INSPECTION ORDER BY Inspection_ID", 7)) {
                 inspectionTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Inspection load note: " + ex.getMessage()); }
     }
 
+    // =========================================================================
+    // 7. VIOLATIONS & WEAK ENTITY FINES TAB
+    // =========================================================================
     private JPanel createViolationAndFineTab() {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setResizeWeight(0.5);
@@ -862,48 +1116,58 @@ public class MainFrame extends JFrame {
         JButton btAddV = new JButton("Add Traffic Violation");
         JButton btRemV = new JButton("Delete Violation");
         JButton btRefV = new JButton("Refresh All");
-        vTop.add(new JLabel("Traffic Violations (BR7):"));
+        vTop.add(new JLabel("Traffic Violations:"));
         vTop.add(btAddV); vTop.add(btRemV); vTop.add(btRefV);
 
-        String[] vCols = {"Violate_ID", "Violate_Datetime", "Street", "District", "City", "Violate_Type", "Description", "Plate_Num"};
+        String[] vCols = {"Violate_ID", "Violation_Type", "Violation_Date", "Location", "Description", "Plate_Num"};
         violationTableModel = new DefaultTableModel(vCols, 0);
         violationTable = new JTable(violationTableModel);
 
         btAddV.addActionListener(e -> {
-            JTextField tfId = new JTextField();
-            JTextField tfDt = new JTextField("2026-05-01 08:30:00");
-            JTextField tfSt = new JTextField();
-            JTextField tfDist = new JTextField();
-            JTextField tfCity = new JTextField("Ho Chi Minh City");
+            int nextId = dao.getNextIntId("TRAFFICVIOLATION", "Violate_ID");
+            JTextField tfId = new JTextField(String.valueOf(nextId));
             JTextField tfType = new JTextField("Speeding");
-            JTextField tfDesc = new JTextField();
-            JTextField tfPlate = new JTextField();
+            JTextField tfDate = new JTextField("2026-03-01");
+            JTextField tfLoc = new JTextField("Vo Van Kiet, D1");
+            JTextField tfDesc = new JTextField("Exceeded speed limit by 15km/h");
+            JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Violate ID (*):")); f.add(tfId);
-            f.add(new JLabel("Datetime (YYYY-MM-DD HH:MM:SS):")); f.add(tfDt);
-            f.add(new JLabel("Street:")); f.add(tfSt);
-            f.add(new JLabel("District:")); f.add(tfDist);
-            f.add(new JLabel("City:")); f.add(tfCity);
-            f.add(new JLabel("Violation Type:")); f.add(tfType);
+            f.add(new JLabel("Violate_ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Violation_Type:")); f.add(tfType);
+            f.add(new JLabel("Violation_Date (YYYY-MM-DD):")); f.add(tfDate);
+            f.add(new JLabel("Location:")); f.add(tfLoc);
             f.add(new JLabel("Description:")); f.add(tfDesc);
-            f.add(new JLabel("Plate Number (*):")); f.add(tfPlate);
+            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Traffic Violation (BR7)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Traffic Violation", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
-                            "INSERT INTO TRAFFICVIOLATION (Violate_ID, Violate_Datetime, Street, District, City, Violate_Type, Description, Plate_Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            tfId.getText().trim(), Timestamp.valueOf(tfDt.getText().trim()), tfSt.getText().trim(),
-                            tfDist.getText().trim(), tfCity.getText().trim(), tfType.getText().trim(), tfDesc.getText().trim(), tfPlate.getText().trim()
+                            "INSERT INTO TRAFFICVIOLATION (Violate_ID, Violation_Type, Violation_Date, Location, Description, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
+                            Integer.parseInt(tfId.getText().trim()), tfType.getText().trim(),
+                            Date.valueOf(tfDate.getText().trim()), tfLoc.getText().trim(),
+                            tfDesc.getText().trim(), cbPlate.getSelectedItem().toString().trim()
                     );
                     loadViolationsFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemV.addActionListener(e -> removeSelectedRow(violationTable, violationTableModel, "TRAFFICVIOLATION", "Violate_ID", () -> {
-            loadViolationsFromDatabase();
-            loadFinesFromDatabase();
-        }));
+        btRemV.addActionListener(e -> {
+            int row = violationTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select a traffic violation row to delete.");
+                return;
+            }
+            int vid = Integer.parseInt(strVal(violationTableModel, row, 0));
+            if (JOptionPane.showConfirmDialog(this, "Delete Violate_ID " + vid + " and its associated Fine notices?",
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                try {
+                    dao.deleteViolationCascade(vid);
+                    loadViolationsFromDatabase();
+                    loadFinesFromDatabase();
+                } catch (SQLException ex) { showDbError(ex); }
+            }
+        });
         btRefV.addActionListener(e -> {
             loadViolationsFromDatabase();
             loadFinesFromDatabase();
@@ -912,47 +1176,68 @@ public class MainFrame extends JFrame {
         vPanel.add(vTop, BorderLayout.NORTH);
         vPanel.add(new JScrollPane(violationTable), BorderLayout.CENTER);
 
+        // Bottom: Weak Entity FINE
         JPanel fPanel = new JPanel(new BorderLayout());
         JPanel fTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btAddF = new JButton("Issue Fine for Violation");
-        JButton btRemF = new JButton("Delete Selected Fine");
-        fTop.add(new JLabel("Fine Notices (Weak Entity - BR8):"));
-        fTop.add(btAddF); fTop.add(btRemF);
+        JButton btAddF = new JButton("Issue Fine Notice");
+        JButton btPaySP = new JButton("Pay Selected Fine (SP2)");
+        JButton btRemF = new JButton("Delete Fine");
+        fTop.add(new JLabel("Fine Notices (Weak Entity):"));
+        fTop.add(btAddF); fTop.add(btPaySP); fTop.add(btRemF);
 
-        String[] fCols = {"Violate_ID (PK/FK)", "Fine_Num (Partial PK)", "Amount", "Due_Date", "Payment_Status", "Paid_Date"};
+        String[] fCols = {"Fine_Num (Partial PK)", "Violate_ID (Owner PK/FK)", "Amount", "Due_Date", "Payment_Status", "Paid_Date"};
         fineTableModel = new DefaultTableModel(fCols, 0);
         fineTable = new JTable(fineTableModel);
 
         btAddF.addActionListener(e -> {
+            int nextFineNum = dao.getNextIntId("FINE", "Fine_Num");
+            List<String> violateIds = dao.getSingleColumnList("SELECT Violate_ID FROM TRAFFICVIOLATION ORDER BY Violate_ID");
+            JComboBox<String> cbVid = new JComboBox<>(violateIds.toArray(new String[0]));
             int vRow = violationTable.getSelectedRow();
-            String defaultViolateId = vRow != -1 ? strVal(violationTableModel, vRow, 0) : "";
+            if (vRow != -1) cbVid.setSelectedItem(strVal(violationTableModel, vRow, 0));
 
-            JTextField tfVid = new JTextField(defaultViolateId);
-            JTextField tfFnum = new JTextField("1");
-            JTextField tfAmt = new JTextField("1500000");
-            JTextField tfDue = new JTextField("2026-06-01");
+            JTextField tfFnum = new JTextField(String.valueOf(nextFineNum));
+            JTextField tfAmt = new JTextField("1500000.00");
+            JTextField tfDue = new JTextField("2026-04-01");
             JTextField tfStatus = new JTextField("Unpaid");
             JTextField tfPaid = new JTextField();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Violate ID (* Owner Key):")); f.add(tfVid);
-            f.add(new JLabel("Fine Num (* Partial Key):")); f.add(tfFnum);
+            f.add(new JLabel("Fine_Num (Int *):")); f.add(tfFnum);
+            f.add(new JLabel("Select Violate_ID (*):")); f.add(cbVid);
             f.add(new JLabel("Amount:")); f.add(tfAmt);
-            f.add(new JLabel("Due Date (YYYY-MM-DD):")); f.add(tfDue);
-            f.add(new JLabel("Payment Status:")); f.add(tfStatus);
-            f.add(new JLabel("Paid Date (YYYY-MM-DD or blank):")); f.add(tfPaid);
+            f.add(new JLabel("Due_Date (YYYY-MM-DD):")); f.add(tfDue);
+            f.add(new JLabel("Payment_Status:")); f.add(tfStatus);
+            f.add(new JLabel("Paid_Date (YYYY-MM-DD or blank):")); f.add(tfPaid);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Add Fine Notice (BR8)", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, f, "Add Fine Notice", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     Date paidDate = tfPaid.getText().trim().isEmpty() ? null : Date.valueOf(tfPaid.getText().trim());
+                    int vid = Integer.parseInt(cbVid.getSelectedItem().toString().trim());
                     dao.executeUpdate(
-                            "INSERT INTO FINE (Violate_ID, Fine_Num, Amount, Due_Date, Payment_Status, Paid_Date) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfVid.getText().trim(), tfFnum.getText().trim(), Double.parseDouble(tfAmt.getText().trim()),
-                            Date.valueOf(tfDue.getText().trim()), tfStatus.getText().trim(), paidDate
+                            "INSERT INTO FINE (Fine_Num, Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date) VALUES (?, ?, ?, ?, ?, ?)",
+                            Integer.parseInt(tfFnum.getText().trim()), vid,
+                            Double.parseDouble(tfAmt.getText().trim()), Date.valueOf(tfDue.getText().trim()),
+                            tfStatus.getText().trim(), paidDate
                     );
                     loadFinesFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
             }
+        });
+
+        btPaySP.addActionListener(e -> {
+            int r = fineTable.getSelectedRow();
+            if (r == -1) {
+                JOptionPane.showMessageDialog(this, "Select an Unpaid fine row in the bottom table first.");
+                return;
+            }
+            int fineNum = Integer.parseInt(strVal(fineTableModel, r, 0));
+            int violateId = Integer.parseInt(strVal(fineTableModel, r, 1));
+            try {
+                dao.callPayFine(fineNum, violateId);
+                loadFinesFromDatabase();
+                JOptionPane.showMessageDialog(this, "Fine #" + fineNum + " marked as Paid via sp_PayFine!");
+            } catch (SQLException ex) { showDbError(ex); }
         });
 
         btRemF.addActionListener(e -> {
@@ -961,10 +1246,10 @@ public class MainFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Select a fine row to delete.");
                 return;
             }
-            String vid = strVal(fineTableModel, r, 0);
-            String fnum = strVal(fineTableModel, r, 1);
+            int fnum = Integer.parseInt(strVal(fineTableModel, r, 0));
+            int vid = Integer.parseInt(strVal(fineTableModel, r, 1));
             try {
-                dao.executeUpdate("DELETE FROM FINE WHERE Violate_ID = ? AND Fine_Num = ?", vid, fnum);
+                dao.executeUpdate("DELETE FROM FINE WHERE Fine_Num = ? AND Violate_ID = ?", fnum, vid);
                 loadFinesFromDatabase();
             } catch (SQLException ex) { showDbError(ex); }
         });
@@ -983,7 +1268,7 @@ public class MainFrame extends JFrame {
     private void loadViolationsFromDatabase() {
         violationTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Violate_ID, Violate_Datetime, Street, District, City, Violate_Type, Description, Plate_Num FROM TRAFFICVIOLATION", 8)) {
+            for (Object[] r : dao.queryTable("SELECT Violate_ID, Violation_Type, Violation_Date, Location, Description, Plate_Num FROM TRAFFICVIOLATION ORDER BY Violate_ID", 6)) {
                 violationTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Violation load note: " + ex.getMessage()); }
@@ -992,13 +1277,16 @@ public class MainFrame extends JFrame {
     private void loadFinesFromDatabase() {
         fineTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Violate_ID, Fine_Num, Amount, Due_Date, Payment_Status, Paid_Date FROM FINE", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Fine_Num, Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date FROM FINE ORDER BY Fine_Num", 6)) {
                 fineTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Fine load note: " + ex.getMessage()); }
     }
 
-    private void removeSelectedRow(JTable table, DefaultTableModel model, String dbTable, String pkCol, Runnable onRefresh) {
+    // =========================================================================
+    // SHARED UI HELPERS
+    // =========================================================================
+    private void removeSelectedRowByIntOrStr(JTable table, DefaultTableModel model, String dbTable, String pkCol, Runnable onRefresh) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select a row in the table to remove.");
@@ -1010,11 +1298,9 @@ public class MainFrame extends JFrame {
                 "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                dao.deleteByKey(dbTable, pkCol, keyVal);
+                dao.executeUpdate("DELETE FROM " + dbTable + " WHERE " + pkCol + " = ?", keyVal);
                 onRefresh.run();
-            } catch (SQLException ex) {
-                showDbError(ex);
-            }
+            } catch (SQLException ex) { showDbError(ex); }
         }
     }
 

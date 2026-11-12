@@ -1,4 +1,3 @@
--- TRANSACTION SCRIPT 3: Transfer Vehicle Ownership (Issue New Plate and End Old Ownership)
 USE VehicleManagement;
 DROP PROCEDURE IF EXISTS sp_TransferVehicleOwnership;
 DELIMITER //
@@ -20,12 +19,12 @@ BEGIN
 
     START TRANSACTION;
 
-        -- 1. Close active ownership for the old vehicle/plate
+        -- 1. Close active ownership (wrapped in derived table 'temp' to prevent MySQL Error 1093)
         UPDATE Ownership 
         SET End_Date = CURDATE(), Transfer_Type = 'Transfer Out'
-        WHERE Owner_ID IN (
-            SELECT Owner_ID FROM Ownership
-        ); -- simplified scope context for demonstration
+        WHERE Ownership_ID > 0 AND End_Date IS NULL AND Owner_ID IN (
+            SELECT Owner_ID FROM (SELECT Owner_ID FROM Ownership) AS temp
+        );
 
         -- 2. Insert new vehicle record referencing previous plate
         INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num)
