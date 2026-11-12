@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainFrame extends JFrame {
-
-    // =========================================================================
-    // DAO LAYER (100% matched to database.sql & Popluate 15+ rows.sql)
-    // =========================================================================
     public static class DatabaseDAO {
         private static final String DB_URL = "jdbc:mysql://localhost:3306/VehicleManagement";
         private static final String DB_USER = "root";
@@ -41,7 +37,6 @@ public class MainFrame extends JFrame {
             return list;
         }
 
-        // ------------------------- 1. VEHICLE (BR1, BR9) -------------------------
         public List<Object[]> getVehicles(String keyword) throws SQLException {
             List<Object[]> rows = new ArrayList<>();
             String sql = "SELECT Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num FROM VEHICLE";
@@ -112,7 +107,6 @@ public class MainFrame extends JFrame {
             }
         }
 
-        // Safely deletes a vehicle by removing dependent child records in a transaction first
         public void deleteVehicleCascade(String plateNum) throws SQLException {
             try (Connection conn = getConnection()) {
                 conn.setAutoCommit(false);
@@ -155,7 +149,6 @@ public class MainFrame extends JFrame {
             }
         }
 
-        // ------------------------- 2. OWNER (BR2, BR10) -------------------------
         public List<Object[]> getOwners() throws SQLException {
             List<Object[]> rows = new ArrayList<>();
             String sql = "SELECT o.Owner_ID, o.Street, o.District, o.City, " +
@@ -348,7 +341,6 @@ public class MainFrame extends JFrame {
             }
         }
 
-        // ------------------------- STORED PROCEDURES -------------------------
         public void callRegisterNewVehicle(String plate, String chassis, String engine, String brand,
                                            String model, int yom, String color, String type,
                                            int ownerId, int regId, String policyNum) throws SQLException {
@@ -395,7 +387,6 @@ public class MainFrame extends JFrame {
             }
         }
 
-        // ------------------------- GENERIC HELPERS -------------------------
         public List<Object[]> queryTable(String sql, int colCount) throws SQLException {
             List<Object[]> rows = new ArrayList<>();
             try (Connection conn = getConnection();
@@ -421,9 +412,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-    // =========================================================================
-    // SWING UI FIELDS
-    // =========================================================================
     private final DatabaseDAO dao = new DatabaseDAO();
 
     private DefaultTableModel vehicleTableModel;
@@ -495,9 +483,6 @@ public class MainFrame extends JFrame {
         return cb;
     }
 
-    // =========================================================================
-    // 1. VEHICLES TAB
-    // =========================================================================
     private JPanel createVehicleTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
@@ -658,9 +643,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-    // =========================================================================
-    // 2. OWNERS TAB
-    // =========================================================================
     private JPanel createOwnerTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -826,9 +808,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { showDbError(ex); }
     }
 
-    // =========================================================================
-    // 3. OWNERSHIP HISTORY TAB
-    // =========================================================================
     private JPanel createOwnershipTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -920,9 +899,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { System.out.println("Ownership load note: " + ex.getMessage()); }
     }
 
-    // =========================================================================
-    // 4. REGISTRATIONS TAB
-    // =========================================================================
     private JPanel createRegistrationTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -981,9 +957,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { System.out.println("Registration load note: " + ex.getMessage()); }
     }
 
-    // =========================================================================
-    // 5. INSURANCE POLICIES TAB
-    // =========================================================================
     private JPanel createInsuranceTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -1041,9 +1014,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { System.out.println("Insurance load note: " + ex.getMessage()); }
     }
 
-    // =========================================================================
-    // 6. TECHNICAL INSPECTIONS TAB
-    // =========================================================================
     private JPanel createInspectionTab() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -1104,9 +1074,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { System.out.println("Inspection load note: " + ex.getMessage()); }
     }
 
-    // =========================================================================
-    // 7. VIOLATIONS & WEAK ENTITY FINES TAB
-    // =========================================================================
     private JPanel createViolationAndFineTab() {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setResizeWeight(0.5);
@@ -1283,9 +1250,6 @@ public class MainFrame extends JFrame {
         } catch (SQLException ex) { System.out.println("Fine load note: " + ex.getMessage()); }
     }
 
-    // =========================================================================
-    // SHARED UI HELPERS
-    // =========================================================================
     private void removeSelectedRowByIntOrStr(JTable table, DefaultTableModel model, String dbTable, String pkCol, Runnable onRefresh) {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
