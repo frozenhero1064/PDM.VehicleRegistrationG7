@@ -1,3 +1,4 @@
+drop database IF exists vehiclemanagement;
 CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
@@ -11,8 +12,7 @@ CREATE TABLE VEHICLE (
     Color VARCHAR(30),
     Type VARCHAR(30),
     Previous_Plate_Num VARCHAR(20) NULL,
-    FOREIGN KEY (Previous_Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Previous_Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
 
 CREATE TABLE Owner (
@@ -33,6 +33,7 @@ CREATE TABLE Individual (
     Identity_Card VARCHAR(50) UNIQUE,
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE Organisation (
@@ -42,6 +43,7 @@ CREATE TABLE Organisation (
     Represent_Name VARCHAR(250),
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE Owner_email (
@@ -49,6 +51,7 @@ CREATE TABLE Owner_email (
     email VARCHAR(100) NOT NULL UNIQUE,
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE Owner_phone (
@@ -56,6 +59,7 @@ CREATE TABLE Owner_phone (
     Phone VARCHAR(20) NOT NULL,
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE Ownership (
@@ -117,8 +121,8 @@ CREATE TABLE FINE (
     Payment_Status VARCHAR(30),
     Paid_Date DATE,
     PRIMARY KEY (Fine_Num, Violate_ID),
-    FOREIGN KEY (Violate_ID)
-        REFERENCES TRAFFICVIOLATION(Violate_ID)
+    FOREIGN KEY (Violate_ID) REFERENCES TRAFFICVIOLATION(Violate_ID)
+		ON DELETE CASCADE
 );
 
 -- check table

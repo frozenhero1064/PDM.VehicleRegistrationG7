@@ -151,18 +151,18 @@ public class MainFrame extends JFrame {
 
         public List<Object[]> getOwners() throws SQLException {
             List<Object[]> rows = new ArrayList<>();
-            String sql = "SELECT o.Owner_ID, o.Street, o.District, o.City, " +
-                    "i.Indentity_Card, i.Fname, i.Mname, i.Lname, i.DoB, i.Gender, " +
+            String sql = "SELECT o.OwnerID, o.Street, o.District, o.City, " +
+                    "i.Identity_Card, i.Fname, i.Mname, i.Lname, i.DoB, i.Gender, " +
                     "org.Tax_Code, org.Company_Name, org.Represent_Name " +
                     "FROM Owner o " +
-                    "LEFT JOIN Individual i ON o.Owner_ID = i.Owner_ID " +
-                    "LEFT JOIN Organisation org ON o.Owner_ID = org.Owner_ID " +
-                    "ORDER BY o.Owner_ID";
+                    "LEFT JOIN Individual i ON o.OwnerID = i.OwnerID " +
+                    "LEFT JOIN Organisation org ON o.OwnerID = org.OwnerID " +
+                    "ORDER BY o.OwnerID";
             try (Connection conn = getConnection();
                  Statement st = conn.createStatement();
                  ResultSet rs = st.executeQuery(sql)) {
                 while (rs.next()) {
-                    String idCard = rs.getString("Indentity_Card");
+                    String idCard = rs.getString("Identity_Card");
                     String taxCode = rs.getString("Tax_Code");
                     String category = (idCard != null) ? "Individual" : (taxCode != null ? "Organisation" : "Owner");
                     String identifier = (idCard != null) ? idCard : (taxCode != null ? taxCode : "");
@@ -178,7 +178,7 @@ public class MainFrame extends JFrame {
                         nameDetails = comp + rep;
                     }
                     rows.add(new Object[]{
-                            rs.getInt("Owner_ID"),
+                            rs.getInt("OwnerID"),
                             category,
                             identifier,
                             nameDetails,
@@ -198,7 +198,7 @@ public class MainFrame extends JFrame {
                 conn.setAutoCommit(false);
                 try {
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO Owner (Owner_ID, Street, District, City) VALUES (?, ?, ?, ?)")) {
+                            "INSERT INTO Owner (OwnerID, Street, District, City) VALUES (?, ?, ?, ?)")) {
                         ps.setInt(1, ownerId);
                         ps.setString(2, street);
                         ps.setString(3, district);
@@ -206,7 +206,7 @@ public class MainFrame extends JFrame {
                         ps.executeUpdate();
                     }
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO Individual (Owner_ID, Fname, Mname, Lname, DoB, Gender, Indentity_Card) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                            "INSERT INTO Individual (OwnerID, Fname, Mname, Lname, DoB, Gender, Identity_Card) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                         ps.setInt(1, ownerId);
                         ps.setString(2, fname.isEmpty() ? "N/A" : fname);
                         ps.setString(3, mname.isEmpty() ? "" : mname);
@@ -234,7 +234,7 @@ public class MainFrame extends JFrame {
                 conn.setAutoCommit(false);
                 try {
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO Owner (Owner_ID, Street, District, City) VALUES (?, ?, ?, ?)")) {
+                            "INSERT INTO Owner (OwnerID, Street, District, City) VALUES (?, ?, ?, ?)")) {
                         ps.setInt(1, ownerId);
                         ps.setString(2, street);
                         ps.setString(3, district);
@@ -242,7 +242,7 @@ public class MainFrame extends JFrame {
                         ps.executeUpdate();
                     }
                     try (PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO Organisation (Owner_ID, Company_Name, Tax_Code, Represent_Name) VALUES (?, ?, ?, ?)")) {
+                            "INSERT INTO Organisation (OwnerID, Company_Name, Tax_Code, Represent_Name) VALUES (?, ?, ?, ?)")) {
                         ps.setInt(1, ownerId);
                         ps.setString(2, companyName);
                         ps.setString(3, taxCode);
@@ -266,7 +266,7 @@ public class MainFrame extends JFrame {
                 try {
                     String[] childTables = {"Owner_phone", "Owner_email", "Ownership", "Individual", "Organisation", "Owner"};
                     for (String tbl : childTables) {
-                        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + tbl + " WHERE Owner_ID = ?")) {
+                        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + tbl + " WHERE OwnerID = ?")) {
                             ps.setInt(1, ownerId);
                             ps.executeUpdate();
                         }
@@ -284,7 +284,7 @@ public class MainFrame extends JFrame {
         private void upsertOwnerContacts(Connection conn, int ownerId, String phone, String email) throws SQLException {
             if (phone != null && !phone.isEmpty()) {
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO Owner_phone (Owner_ID, Phone) VALUES (?, ?) ON DUPLICATE KEY UPDATE Phone = VALUES(Phone)")) {
+                        "INSERT INTO Owner_phone (OwnerID, Phone) VALUES (?, ?) ON DUPLICATE KEY UPDATE Phone = VALUES(Phone)")) {
                     ps.setInt(1, ownerId);
                     ps.setString(2, phone);
                     ps.executeUpdate();
@@ -292,7 +292,7 @@ public class MainFrame extends JFrame {
             }
             if (email != null && !email.isEmpty()) {
                 try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO Owner_email (Owner_ID, email) VALUES (?, ?) ON DUPLICATE KEY UPDATE email = VALUES(email)")) {
+                        "INSERT INTO Owner_email (OwnerID, email) VALUES (?, ?) ON DUPLICATE KEY UPDATE email = VALUES(email)")) {
                     ps.setInt(1, ownerId);
                     ps.setString(2, email);
                     ps.executeUpdate();
@@ -302,7 +302,7 @@ public class MainFrame extends JFrame {
 
         public List<String> getOwnerContacts(String table, String col, int ownerId) throws SQLException {
             List<String> list = new ArrayList<>();
-            String sql = "SELECT " + col + " FROM " + table + " WHERE Owner_ID = ?";
+            String sql = "SELECT " + col + " FROM " + table + " WHERE OwnerID = ?";
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, ownerId);
@@ -477,7 +477,7 @@ public class MainFrame extends JFrame {
     }
 
     private JComboBox<String> createOwnerComboBox() {
-        List<String> owners = dao.getSingleColumnList("SELECT Owner_ID FROM Owner ORDER BY Owner_ID");
+        List<String> owners = dao.getSingleColumnList("SELECT OwnerID FROM Owner ORDER BY OwnerID");
         JComboBox<String> cb = new JComboBox<>(owners.toArray(new String[0]));
         cb.setEditable(true);
         return cb;
@@ -560,15 +560,15 @@ public class MainFrame extends JFrame {
             return;
         }
 
-        JTextField tfPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 0) : "51K-88899");
+        JTextField tfPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 0) : "");
         tfPlate.setEditable(!isEdit);
-        JTextField tfChassis = new JTextField(isEdit ? strVal(vehicleTableModel, row, 1) : "CHS016ENG16");
-        JTextField tfEngine = new JTextField(isEdit ? strVal(vehicleTableModel, row, 2) : "ENG100016");
-        JTextField tfBrand = new JTextField(isEdit ? strVal(vehicleTableModel, row, 3) : "Toyota");
-        JTextField tfModel = new JTextField(isEdit ? strVal(vehicleTableModel, row, 4) : "Corolla Cross");
-        JTextField tfYom = new JTextField(isEdit ? strVal(vehicleTableModel, row, 5) : "2026");
-        JTextField tfColor = new JTextField(isEdit ? strVal(vehicleTableModel, row, 6) : "White");
-        JTextField tfType = new JTextField(isEdit ? strVal(vehicleTableModel, row, 7) : "SUV");
+        JTextField tfChassis = new JTextField(isEdit ? strVal(vehicleTableModel, row, 1) : "");
+        JTextField tfEngine = new JTextField(isEdit ? strVal(vehicleTableModel, row, 2) : "");
+        JTextField tfBrand = new JTextField(isEdit ? strVal(vehicleTableModel, row, 3) : "");
+        JTextField tfModel = new JTextField(isEdit ? strVal(vehicleTableModel, row, 4) : "");
+        JTextField tfYom = new JTextField(isEdit ? strVal(vehicleTableModel, row, 5) : "");
+        JTextField tfColor = new JTextField(isEdit ? strVal(vehicleTableModel, row, 6) : "");
+        JTextField tfType = new JTextField(isEdit ? strVal(vehicleTableModel, row, 7) : "");
         JTextField tfPrevPlate = new JTextField(isEdit ? strVal(vehicleTableModel, row, 8) : "");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
@@ -623,7 +623,7 @@ public class MainFrame extends JFrame {
         f.add(new JLabel("YOM (*):")); f.add(tfYom);
         f.add(new JLabel("Color:")); f.add(tfColor);
         f.add(new JLabel("Type:")); f.add(tfType);
-        f.add(new JLabel("Select Existing Owner_ID (*):")); f.add(cbOwner);
+        f.add(new JLabel("Select Existing OwnerID (*):")); f.add(cbOwner);
         f.add(new JLabel("New Registration_ID (*):")); f.add(tfRegId);
         f.add(new JLabel("New Policy_Num (*):")); f.add(tfPolicyNum);
 
@@ -659,7 +659,7 @@ public class MainFrame extends JFrame {
         topBar.add(btRemove);
         topBar.add(btRefresh);
 
-        String[] cols = {"Owner_ID", "Category", "Indentity_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
+        String[] cols = {"OwnerID", "Category", "Identity_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
         ownerTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -677,7 +677,7 @@ public class MainFrame extends JFrame {
             }
             int ownerId = Integer.parseInt(strVal(ownerTableModel, row, 0));
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Delete Owner_ID " + ownerId + " and their subtype/contact/ownership records?",
+                    "Delete OwnerID " + ownerId + " and their subtype/contact/ownership records?",
                     "Confirm Delete", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
@@ -703,7 +703,7 @@ public class MainFrame extends JFrame {
     }
 
     private void showAddIndividualDialog() {
-        int nextId = dao.getNextIntId("Owner", "Owner_ID");
+        int nextId = dao.getNextIntId("Owner", "OwnerID");
         JTextField tfOwnerId = new JTextField(String.valueOf(nextId));
         JTextField tfIdCard = new JTextField("07920000" + (1000 + nextId));
         JTextField tfFname = new JTextField("Nguyen");
@@ -718,8 +718,8 @@ public class MainFrame extends JFrame {
         JTextField tfEmail = new JTextField("owner" + nextId + "@gmail.com");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 6, 6));
-        form.add(new JLabel("Owner_ID (Int *):")); form.add(tfOwnerId);
-        form.add(new JLabel("Indentity_Card (* Unique):")); form.add(tfIdCard);
+        form.add(new JLabel("OwnerID (Int *):")); form.add(tfOwnerId);
+        form.add(new JLabel("Identity_Card (* Unique):")); form.add(tfIdCard);
         form.add(new JLabel("First Name (*):")); form.add(tfFname);
         form.add(new JLabel("Middle Name (*):")); form.add(tfMname);
         form.add(new JLabel("Last Name (*):")); form.add(tfLname);
@@ -744,7 +744,7 @@ public class MainFrame extends JFrame {
     }
 
     private void showAddOrganisationDialog() {
-        int nextId = dao.getNextIntId("Owner", "Owner_ID");
+        int nextId = dao.getNextIntId("Owner", "OwnerID");
         JTextField tfOwnerId = new JTextField(String.valueOf(nextId));
         JTextField tfTax = new JTextField("0300999" + (100 + nextId));
         JTextField tfComp = new JTextField("Saigon Logistics Co., Ltd.");
@@ -756,7 +756,7 @@ public class MainFrame extends JFrame {
         JTextField tfEmail = new JTextField("contact" + nextId + "@company.vn");
 
         JPanel form = new JPanel(new GridLayout(0, 2, 6, 6));
-        form.add(new JLabel("Owner_ID (Int *):")); form.add(tfOwnerId);
+        form.add(new JLabel("OwnerID (Int *):")); form.add(tfOwnerId);
         form.add(new JLabel("Tax Code (* Unique):")); form.add(tfTax);
         form.add(new JLabel("Company Name (*):")); form.add(tfComp);
         form.add(new JLabel("Representative Name:")); form.add(tfRep);
@@ -793,7 +793,7 @@ public class MainFrame extends JFrame {
             JTextField tfNewEmail = new JTextField(emails.isEmpty() ? "" : emails.get(0));
 
             JPanel panel = new JPanel(new GridLayout(0, 1, 4, 4));
-            panel.add(new JLabel("Owner_ID: " + ownerId));
+            panel.add(new JLabel("OwnerID: " + ownerId));
             panel.add(new JLabel("Current Phone: " + (phones.isEmpty() ? "None" : String.join(", ", phones))));
             panel.add(new JLabel("Current Email: " + (emails.isEmpty() ? "None" : String.join(", ", emails))));
             panel.add(new JLabel("Set / Update Phone Number:"));
@@ -817,7 +817,7 @@ public class MainFrame extends JFrame {
         JButton btRefresh = new JButton("Refresh");
         top.add(btAdd); top.add(btTransferSP); top.add(btRemove); top.add(btRefresh);
 
-        String[] cols = {"Ownership_ID", "Owner_ID", "Start_Date", "End_Date", "Transfer_Type"};
+        String[] cols = {"Ownership_ID", "OwnerID", "Start_Date", "End_Date", "Transfer_Type"};
         ownershipTableModel = new DefaultTableModel(cols, 0);
         ownershipTable = new JTable(ownershipTableModel);
 
@@ -831,7 +831,7 @@ public class MainFrame extends JFrame {
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
             f.add(new JLabel("Ownership_ID (Int *):")); f.add(tfId);
-            f.add(new JLabel("Select Owner_ID (*):")); f.add(cbOwner);
+            f.add(new JLabel("Select OwnerID (*):")); f.add(cbOwner);
             f.add(new JLabel("Start_Date (YYYY-MM-DD):")); f.add(tfStart);
             f.add(new JLabel("End_Date (YYYY-MM-DD or blank):")); f.add(tfEnd);
             f.add(new JLabel("Transfer_Type:")); f.add(tfType);
@@ -841,7 +841,7 @@ public class MainFrame extends JFrame {
                     Date endDate = tfEnd.getText().trim().isEmpty() ? null : Date.valueOf(tfEnd.getText().trim());
                     int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
                     dao.executeUpdate(
-                            "INSERT INTO Ownership (Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?)",
+                            "INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?)",
                             Integer.parseInt(tfId.getText().trim()), ownerId,
                             Date.valueOf(tfStart.getText().trim()), endDate, tfType.getText().trim()
                     );
@@ -864,7 +864,7 @@ public class MainFrame extends JFrame {
             f.add(new JLabel("New Plate_Num (*):")); f.add(tfNewPlate);
             f.add(new JLabel("New Chassis_Num (*):")); f.add(tfNewChassis);
             f.add(new JLabel("New Engine_Num (*):")); f.add(tfNewEngine);
-            f.add(new JLabel("Select New Owner_ID (*):")); f.add(cbNewOwner);
+            f.add(new JLabel("Select New OwnerID (*):")); f.add(cbNewOwner);
             f.add(new JLabel("New Ownership_ID (Int *):")); f.add(tfNewOwnId);
 
             if (JOptionPane.showConfirmDialog(this, f, "Transaction Script 3: sp_TransferVehicleOwnership",
@@ -893,7 +893,7 @@ public class MainFrame extends JFrame {
     private void loadOwnershipsFromDatabase() {
         ownershipTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 5)) {
+            for (Object[] r : dao.queryTable("SELECT Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 5)) {
                 ownershipTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Ownership load note: " + ex.getMessage()); }
