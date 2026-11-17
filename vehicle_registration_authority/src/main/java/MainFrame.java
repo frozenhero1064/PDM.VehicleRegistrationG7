@@ -1257,9 +1257,7 @@ public class MainFrame extends JFrame {
             return;
         }
         String keyVal = strVal(model, selectedRow, 0);
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Delete record '" + keyVal + "' from " + dbTable + "?",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this,"Delete record '" + keyVal + "' from " + dbTable + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 dao.executeUpdate("DELETE FROM " + dbTable + " WHERE " + pkCol + " = ?", keyVal);
@@ -1274,8 +1272,7 @@ public class MainFrame extends JFrame {
     }
 
     private void showDbError(Exception ex) {
-        JOptionPane.showMessageDialog(this, "Database Error:\n" + ex.getMessage(),
-                "Database Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Database Error:\n" + ex.getMessage(),"Database Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void main(String[] args) {

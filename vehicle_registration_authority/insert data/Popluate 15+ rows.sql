@@ -19,7 +19,7 @@ INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Colo
 ('30E-99001', 'CHS015ENG15', 'ENG100015', 'Ford', 'Transit', 2018, 'White', 'Van', NULL);
 
 -- 2. OWNER
-INSERT INTO Owner (Owner_ID, Street, District, City) VALUES
+INSERT INTO Owner (OwnerID, Street, District, City) VALUES
 (1, '12 Le Duan', 'District 1', 'Ho Chi Minh City'),
 (2, '45 Ba Trieu', 'Hoan Kiem', 'Hanoi'),
 (3, '78 Nguyen Van Linh', 'Hai Chau', 'Da Nang'),
@@ -37,7 +37,7 @@ INSERT INTO Owner (Owner_ID, Street, District, City) VALUES
 (15, '66 Nguyen Trai', 'Thanh Xuan', 'Hanoi');
 
 -- 3. INDIVIDUAL
-INSERT INTO Individual (Owner_ID, Fname, Mname, Lname, DoB, Gender, Indentity_Card) VALUES
+INSERT INTO Individual (OwnerID, Fname, Mname, Lname, DoB, Gender, Identity_Card) VALUES
 (1, 'Nguyen', 'Van', 'An', '1985-05-12', 'Male', '079085001234'),
 (2, 'Tran', 'Thi', 'Binh', '1990-08-22', 'Female', '001090005678'),
 (3, 'Le', 'Hoang', 'Cuong', '1982-12-03', 'Male', '048082009876'),
@@ -50,7 +50,7 @@ INSERT INTO Individual (Owner_ID, Fname, Mname, Lname, DoB, Gender, Indentity_Ca
 (10, 'Ngo', 'Duc', 'Phuc', '1987-06-30', 'Male', '079087009900');
 
 -- 4. ORGANISATION
-INSERT INTO Organisation (Owner_ID, Company_Name, Tax_Code, Represent_Name) VALUES
+INSERT INTO Organisation (OwnerID, Company_Name, Tax_Code, Represent_Name) VALUES
 (11, 'FPT Software Co., Ltd.', '0101781820', 'Nguyen Van A'),
 (12, 'Viettel Group', '0100109106', 'Le Dang D.'),
 (13, 'Vingroup JSC', '0101245486', 'Pham Nhat V.'),
@@ -58,7 +58,7 @@ INSERT INTO Organisation (Owner_ID, Company_Name, Tax_Code, Represent_Name) VALU
 (15, 'Thaco Truong Hai', '3700201416', 'Tran Ba D.');
 
 -- 5. OWNER_EMAIL
-INSERT INTO Owner_email (Owner_ID, email) VALUES
+INSERT INTO Owner_email (OwnerID, email) VALUES
 (1, 'an.nguyen@gmail.com'),
 (2, 'binh.tran@yahoo.com'),
 (3, 'cuong.le@outlook.com'),
@@ -76,7 +76,7 @@ INSERT INTO Owner_email (Owner_ID, email) VALUES
 (15, 'info@thaco.com.vn');
 
 -- 6. OWNER_PHONE
-INSERT INTO Owner_phone (Owner_ID, Phone) VALUES
+INSERT INTO Owner_phone (OwnerID, Phone) VALUES
 (1, '0901112233'),
 (2, '0912223344'),
 (3, '0923334455'),
@@ -94,7 +94,7 @@ INSERT INTO Owner_phone (Owner_ID, Phone) VALUES
 (15, '02538383838');
 
 -- 7. OWNERSHIP
-INSERT INTO Ownership (Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type) VALUES
+INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type) VALUES
 (1, 1, '2018-03-01', NULL, 'New Purchase'),
 (2, 2, '2020-05-15', NULL, 'New Purchase'),
 (3, 3, '2021-01-10', NULL, 'New Purchase'),
