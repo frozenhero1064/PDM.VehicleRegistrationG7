@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/PDM.VehicleRegistrationG7.iml" filepath="$PROJECT_DIR$/.idea/PDM.VehicleRegistrationG7.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vehicle_registration_authority/vehicle_registration_authority.iml" filepath="$PROJECT_DIR$/vehicle_registration_authority/vehicle_registration_authority.iml" />
     </modules>
   </component>
 </project>

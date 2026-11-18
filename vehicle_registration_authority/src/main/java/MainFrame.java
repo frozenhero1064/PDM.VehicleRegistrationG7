@@ -362,12 +362,11 @@ public class MainFrame extends JFrame {
             }
         }
 
-        public void callPayFine(int fineNum, int violateId) throws SQLException {
-            String sql = "{CALL sp_PayFine(?, ?)}";
+        public void callPayFine(int violateId) throws SQLException {
+            String sql = "{CALL sp_PayFine(?)}";
             try (Connection conn = getConnection();
                  CallableStatement cs = conn.prepareCall(sql)) {
-                cs.setInt(1, fineNum);
-                cs.setInt(2, violateId);
+                cs.setInt(1, violateId);
                 cs.execute();
             }
         }
@@ -493,7 +492,6 @@ public class MainFrame extends JFrame {
         JButton btFullReg = new JButton("Full Register");
         JButton btEdit = new JButton("Edit Selected");
         JButton btRemove = new JButton("Remove Vehicle");
-        JButton btRefresh = new JButton("Refresh");
 
         topBar.add(new JLabel("Filter:"));
         topBar.add(tfVehicleSearch);
@@ -502,7 +500,6 @@ public class MainFrame extends JFrame {
         topBar.add(btFullReg);
         topBar.add(btEdit);
         topBar.add(btRemove);
-        topBar.add(btRefresh);
 
         String[] columns = {"Plate_Num", "Chassis_Num", "Engine_Num", "Brand", "Model", "YOM", "Color", "Type", "Previous_Plate_Num"};
         vehicleTableModel = new DefaultTableModel(columns, 0) {
@@ -531,10 +528,6 @@ public class MainFrame extends JFrame {
                     refreshAllTabs();
                 } catch (SQLException ex) { showDbError(ex); }
             }
-        });
-        btRefresh.addActionListener(e -> {
-            tfVehicleSearch.setText("");
-            refreshAllTabs();
         });
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -651,13 +644,11 @@ public class MainFrame extends JFrame {
         JButton btAddOrg = new JButton("Add Organisation Owner");
         JButton btContacts = new JButton("View / Set Phone & Email");
         JButton btRemove = new JButton("Delete Owner");
-        JButton btRefresh = new JButton("Refresh");
 
         topBar.add(btAddInd);
         topBar.add(btAddOrg);
         topBar.add(btContacts);
         topBar.add(btRemove);
-        topBar.add(btRefresh);
 
         String[] cols = {"OwnerID", "Category", "Identity_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
         ownerTableModel = new DefaultTableModel(cols, 0) {
@@ -686,7 +677,6 @@ public class MainFrame extends JFrame {
                 } catch (SQLException ex) { showDbError(ex); }
             }
         });
-        btRefresh.addActionListener(e -> loadOwnersFromDatabase());
 
         panel.add(topBar, BorderLayout.NORTH);
         panel.add(new JScrollPane(ownerTable), BorderLayout.CENTER);
@@ -814,8 +804,7 @@ public class MainFrame extends JFrame {
         JButton btAdd = new JButton("Add Ownership Record");
         JButton btTransferSP = new JButton("Transfer Ownership");
         JButton btRemove = new JButton("Delete Record");
-        JButton btRefresh = new JButton("Refresh");
-        top.add(btAdd); top.add(btTransferSP); top.add(btRemove); top.add(btRefresh);
+        top.add(btAdd); top.add(btTransferSP); top.add(btRemove);
 
         String[] cols = {"Ownership_ID", "OwnerID", "Start_Date", "End_Date", "Transfer_Type"};
         ownershipTableModel = new DefaultTableModel(cols, 0);
@@ -883,7 +872,6 @@ public class MainFrame extends JFrame {
         });
 
         btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(ownershipTable, ownershipTableModel, "Ownership", "Ownership_ID", this::loadOwnershipsFromDatabase));
-        btRefresh.addActionListener(e -> loadOwnershipsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(ownershipTable), BorderLayout.CENTER);
@@ -904,8 +892,7 @@ public class MainFrame extends JFrame {
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAdd = new JButton("Add Certificate");
         JButton btRemove = new JButton("Remove Certificate");
-        JButton btRefresh = new JButton("Refresh");
-        top.add(btAdd); top.add(btRemove); top.add(btRefresh);
+        top.add(btAdd); top.add(btRemove);
 
         String[] cols = {"Registration_ID", "Registration_Date", "Expiry_Date", "Status", "Issued_By", "Plate_Num"};
         registrationTableModel = new DefaultTableModel(cols, 0);
@@ -941,7 +928,6 @@ public class MainFrame extends JFrame {
             }
         });
         btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(registrationTable, registrationTableModel, "REGISTRATION", "Registration_ID", this::loadRegistrationsFromDatabase));
-        btRefresh.addActionListener(e -> loadRegistrationsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(registrationTable), BorderLayout.CENTER);
@@ -962,8 +948,7 @@ public class MainFrame extends JFrame {
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAdd = new JButton("Add Policy");
         JButton btRemove = new JButton("Remove Policy");
-        JButton btRefresh = new JButton("Refresh");
-        top.add(btAdd); top.add(btRemove); top.add(btRefresh);
+        top.add(btAdd); top.add(btRemove);
 
         String[] cols = {"Policy_Num", "Policy_Name", "Start_Date", "End_Date", "Insurance Type", "Plate_Num"};
         insuranceTableModel = new DefaultTableModel(cols, 0);
@@ -998,7 +983,6 @@ public class MainFrame extends JFrame {
             }
         });
         btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(insuranceTable, insuranceTableModel, "INSURANCEPOLICY", "Policy_Num", this::loadInsuranceFromDatabase));
-        btRefresh.addActionListener(e -> loadInsuranceFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(insuranceTable), BorderLayout.CENTER);
@@ -1019,8 +1003,7 @@ public class MainFrame extends JFrame {
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAdd = new JButton("Add Inspection");
         JButton btRemove = new JButton("Remove Inspection");
-        JButton btRefresh = new JButton("Refresh");
-        top.add(btAdd); top.add(btRemove); top.add(btRefresh);
+        top.add(btAdd); top.add(btRemove);
 
         String[] cols = {"Inspection_ID", "Inspection_Date", "Result", "Inspector_Name", "Expiry_Date", "Notes", "Plate_Num"};
         inspectionTableModel = new DefaultTableModel(cols, 0);
@@ -1058,7 +1041,6 @@ public class MainFrame extends JFrame {
             }
         });
         btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(inspectionTable, inspectionTableModel, "INSPECTION", "Inspection_ID", this::loadInspectionsFromDatabase));
-        btRefresh.addActionListener(e -> loadInspectionsFromDatabase());
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(inspectionTable), BorderLayout.CENTER);
@@ -1082,11 +1064,10 @@ public class MainFrame extends JFrame {
         JPanel vTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAddV = new JButton("Add Traffic Violation");
         JButton btRemV = new JButton("Delete Violation");
-        JButton btRefV = new JButton("Refresh All");
         vTop.add(new JLabel("Traffic Violations:"));
-        vTop.add(btAddV); vTop.add(btRemV); vTop.add(btRefV);
+        vTop.add(btAddV); vTop.add(btRemV);
 
-        String[] vCols = {"Violate_ID", "Violation_Type", "Violation_Date", "Location", "Description", "Plate_Num"};
+        String[] vCols = {"Violation ID", "Violation Type", "Violation Date", "Location", "Description", "Plate_Num"};
         violationTableModel = new DefaultTableModel(vCols, 0);
         violationTable = new JTable(violationTableModel);
 
@@ -1100,7 +1081,7 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Owner ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Violation ID (Int *):")); f.add(tfId);
             f.add(new JLabel("Violation Type:")); f.add(tfType);
             f.add(new JLabel("Violation Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Location:")); f.add(tfLoc);
@@ -1135,10 +1116,6 @@ public class MainFrame extends JFrame {
                 } catch (SQLException ex) { showDbError(ex); }
             }
         });
-        btRefV.addActionListener(e -> {
-            loadViolationsFromDatabase();
-            loadFinesFromDatabase();
-        });
 
         vPanel.add(vTop, BorderLayout.NORTH);
         vPanel.add(new JScrollPane(violationTable), BorderLayout.CENTER);
@@ -1152,26 +1129,23 @@ public class MainFrame extends JFrame {
         fTop.add(new JLabel("Fine Notices:"));
         fTop.add(btAddF); fTop.add(btPaySP); fTop.add(btRemF);
 
-        String[] fCols = {"Fine Num", "Owner ID", "Amount (VND)", "Due Date", "Payment Status", "Paid Date"};
+        String[] fCols = {"Violation ID", "Amount (VND)", "Due Date", "Payment Status", "Paid Date"};
         fineTableModel = new DefaultTableModel(fCols, 0);
         fineTable = new JTable(fineTableModel);
 
         btAddF.addActionListener(e -> {
-            int nextFineNum = dao.getNextIntId("FINE", "Fine_Num");
             List<String> violateIds = dao.getSingleColumnList("SELECT Violate_ID FROM TRAFFICVIOLATION ORDER BY Violate_ID");
             JComboBox<String> cbVid = new JComboBox<>(violateIds.toArray(new String[0]));
             int vRow = violationTable.getSelectedRow();
             if (vRow != -1) cbVid.setSelectedItem(strVal(violationTableModel, vRow, 0));
 
-            JTextField tfFnum = new JTextField(String.valueOf(nextFineNum));
             JTextField tfAmt = new JTextField("1500000.00");
             JTextField tfDue = new JTextField("2026-04-01");
             JTextField tfStatus = new JTextField("Unpaid");
             JTextField tfPaid = new JTextField();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Fine_Num (Int *):")); f.add(tfFnum);
-            f.add(new JLabel("Select Owner ID (*):")); f.add(cbVid);
+            f.add(new JLabel("Select Violation ID (*):")); f.add(cbVid);
             f.add(new JLabel("Amount (VND):")); f.add(tfAmt);
             f.add(new JLabel("Due_Date (YYYY-MM-DD):")); f.add(tfDue);
             f.add(new JLabel("Payment_Status:")); f.add(tfStatus);
@@ -1182,10 +1156,8 @@ public class MainFrame extends JFrame {
                     Date paidDate = tfPaid.getText().trim().isEmpty() ? null : Date.valueOf(tfPaid.getText().trim());
                     int vid = Integer.parseInt(cbVid.getSelectedItem().toString().trim());
                     dao.executeUpdate(
-                            "INSERT INTO FINE (Fine_Num, Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date) VALUES (?, ?, ?, ?, ?, ?)",
-                            Integer.parseInt(tfFnum.getText().trim()), vid,
-                            Double.parseDouble(tfAmt.getText().trim()), Date.valueOf(tfDue.getText().trim()),
-                            tfStatus.getText().trim(), paidDate
+                            "INSERT INTO FINE (Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date) VALUES (?, ?, ?, ?, ?)",
+                            vid, Double.parseDouble(tfAmt.getText().trim()), Date.valueOf(tfDue.getText().trim()), tfStatus.getText().trim(), paidDate
                     );
                     loadFinesFromDatabase();
                 } catch (Exception ex) { showDbError(ex); }
@@ -1198,12 +1170,11 @@ public class MainFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Select an Unpaid fine row in the bottom table first.");
                 return;
             }
-            int fineNum = Integer.parseInt(strVal(fineTableModel, r, 0));
-            int violateId = Integer.parseInt(strVal(fineTableModel, r, 1));
+            int violateId = Integer.parseInt(strVal(fineTableModel, r, 0));
             try {
-                dao.callPayFine(fineNum, violateId);
+                dao.callPayFine(violateId);
                 loadFinesFromDatabase();
-                JOptionPane.showMessageDialog(this, "Fine #" + fineNum + " marked as Paid via sp_PayFine!");
+                JOptionPane.showMessageDialog(this, "Fine #" + violateId + " Marked as Paid!");
             } catch (SQLException ex) { showDbError(ex); }
         });
 
@@ -1213,10 +1184,9 @@ public class MainFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Select a fine row to delete.");
                 return;
             }
-            int fnum = Integer.parseInt(strVal(fineTableModel, r, 0));
-            int vid = Integer.parseInt(strVal(fineTableModel, r, 1));
+            int vid = Integer.parseInt(strVal(fineTableModel, r, 0));
             try {
-                dao.executeUpdate("DELETE FROM FINE WHERE Fine_Num = ? AND Violate_ID = ?", fnum, vid);
+                dao.executeUpdate("DELETE FROM FINE WHERE Violate_ID = ?", vid);
                 loadFinesFromDatabase();
             } catch (SQLException ex) { showDbError(ex); }
         });
@@ -1244,7 +1214,7 @@ public class MainFrame extends JFrame {
     private void loadFinesFromDatabase() {
         fineTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Fine_Num, Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date FROM FINE ORDER BY Fine_Num", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date FROM FINE ORDER BY Violate_ID", 5)) {
                 fineTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Fine load note: " + ex.getMessage()); }
