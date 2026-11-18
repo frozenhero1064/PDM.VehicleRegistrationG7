@@ -490,7 +490,7 @@ public class MainFrame extends JFrame {
         tfVehicleSearch = new JTextField(14);
         JButton btSearch = new JButton("Search");
         JButton btAdd = new JButton("Add Vehicle");
-        JButton btFullReg = new JButton("Full Register (SP1)");
+        JButton btFullReg = new JButton("Full Register");
         JButton btEdit = new JButton("Edit Selected");
         JButton btRemove = new JButton("Remove Vehicle");
         JButton btRefresh = new JButton("Refresh");
@@ -627,7 +627,7 @@ public class MainFrame extends JFrame {
         f.add(new JLabel("New Registration_ID (*):")); f.add(tfRegId);
         f.add(new JLabel("New Policy_Num (*):")); f.add(tfPolicyNum);
 
-        if (JOptionPane.showConfirmDialog(this, f, "Transaction Script 1: sp_RegisterNewVehicle",
+        if (JOptionPane.showConfirmDialog(this, f, "Registration",
                 JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
                 int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
@@ -812,7 +812,7 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAdd = new JButton("Add Ownership Record");
-        JButton btTransferSP = new JButton("Transfer Ownership (SP3)");
+        JButton btTransferSP = new JButton("Transfer Ownership");
         JButton btRemove = new JButton("Delete Record");
         JButton btRefresh = new JButton("Refresh");
         top.add(btAdd); top.add(btTransferSP); top.add(btRemove); top.add(btRefresh);
@@ -921,12 +921,12 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Registration_ID (Int *):")); f.add(tfId);
-            f.add(new JLabel("Registration_Date (YYYY-MM-DD):")); f.add(tfRegDate);
-            f.add(new JLabel("Expiry_Date (YYYY-MM-DD):")); f.add(tfExpDate);
+            f.add(new JLabel("Registration ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Registration Date (YYYY-MM-DD):")); f.add(tfRegDate);
+            f.add(new JLabel("Expiry Date (YYYY-MM-DD):")); f.add(tfExpDate);
             f.add(new JLabel("Status:")); f.add(tfStatus);
-            f.add(new JLabel("Issued_By:")); f.add(tfIssued);
-            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
+            f.add(new JLabel("Issued By:")); f.add(tfIssued);
+            f.add(new JLabel("Select Vehicle Plate Num (*):")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Registration", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
@@ -965,7 +965,7 @@ public class MainFrame extends JFrame {
         JButton btRefresh = new JButton("Refresh");
         top.add(btAdd); top.add(btRemove); top.add(btRefresh);
 
-        String[] cols = {"Policy_Num", "Policy_Name", "Start_Date", "End_Date", "Insurance_Type", "Plate_Num"};
+        String[] cols = {"Policy_Num", "Policy_Name", "Start_Date", "End_Date", "Insurance Type", "Plate_Num"};
         insuranceTableModel = new DefaultTableModel(cols, 0);
         insuranceTable = new JTable(insuranceTableModel);
 
@@ -979,12 +979,12 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Policy_Num (* Unique):")); f.add(tfNum);
-            f.add(new JLabel("Policy_Name:")); f.add(tfName);
-            f.add(new JLabel("Start_Date (YYYY-MM-DD):")); f.add(tfStart);
-            f.add(new JLabel("End_Date (YYYY-MM-DD):")); f.add(tfEnd);
-            f.add(new JLabel("Insurance_Type:")); f.add(tfType);
-            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
+            f.add(new JLabel("Policy Num (* Unique):")); f.add(tfNum);
+            f.add(new JLabel("Policy Name:")); f.add(tfName);
+            f.add(new JLabel("Start Date (YYYY-MM-DD):")); f.add(tfStart);
+            f.add(new JLabel("End Date (YYYY-MM-DD):")); f.add(tfEnd);
+            f.add(new JLabel("Insurance Type:")); f.add(tfType);
+            f.add(new JLabel("Select Vehicle Plate Num (*):")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Insurance Policy", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
@@ -1037,13 +1037,13 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Inspection_ID (Int *):")); f.add(tfId);
-            f.add(new JLabel("Inspection_Date (YYYY-MM-DD):")); f.add(tfDate);
+            f.add(new JLabel("Inspection ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Inspection Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Result (Pass/Fail):")); f.add(tfRes);
-            f.add(new JLabel("Inspector_Name:")); f.add(tfInsp);
-            f.add(new JLabel("Expiry_Date (YYYY-MM-DD):")); f.add(tfExp);
+            f.add(new JLabel("Inspector Name:")); f.add(tfInsp);
+            f.add(new JLabel("Expiry Date (YYYY-MM-DD):")); f.add(tfExp);
             f.add(new JLabel("Notes:")); f.add(tfNotes);
-            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
+            f.add(new JLabel("Select Vehicle Plate Num (*):")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Technical Inspection", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
@@ -1100,12 +1100,12 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Violate_ID (Int *):")); f.add(tfId);
-            f.add(new JLabel("Violation_Type:")); f.add(tfType);
-            f.add(new JLabel("Violation_Date (YYYY-MM-DD):")); f.add(tfDate);
+            f.add(new JLabel("Owner ID (Int *):")); f.add(tfId);
+            f.add(new JLabel("Violation Type:")); f.add(tfType);
+            f.add(new JLabel("Violation Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Location:")); f.add(tfLoc);
             f.add(new JLabel("Description:")); f.add(tfDesc);
-            f.add(new JLabel("Select Vehicle Plate_Num (*):")); f.add(cbPlate);
+            f.add(new JLabel("Select Vehicle Plate Num (*):")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Traffic Violation", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
@@ -1147,12 +1147,12 @@ public class MainFrame extends JFrame {
         JPanel fPanel = new JPanel(new BorderLayout());
         JPanel fTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btAddF = new JButton("Issue Fine Notice");
-        JButton btPaySP = new JButton("Pay Selected Fine (SP2)");
+        JButton btPaySP = new JButton("Pay Selected Fine");
         JButton btRemF = new JButton("Delete Fine");
-        fTop.add(new JLabel("Fine Notices (Weak Entity):"));
+        fTop.add(new JLabel("Fine Notices:"));
         fTop.add(btAddF); fTop.add(btPaySP); fTop.add(btRemF);
 
-        String[] fCols = {"Fine_Num (Partial PK)", "Violate_ID (Owner PK/FK)", "Amount", "Due_Date", "Payment_Status", "Paid_Date"};
+        String[] fCols = {"Fine Num", "Owner ID", "Amount (VND)", "Due Date", "Payment Status", "Paid Date"};
         fineTableModel = new DefaultTableModel(fCols, 0);
         fineTable = new JTable(fineTableModel);
 
@@ -1171,8 +1171,8 @@ public class MainFrame extends JFrame {
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
             f.add(new JLabel("Fine_Num (Int *):")); f.add(tfFnum);
-            f.add(new JLabel("Select Violate_ID (*):")); f.add(cbVid);
-            f.add(new JLabel("Amount:")); f.add(tfAmt);
+            f.add(new JLabel("Select Owner ID (*):")); f.add(cbVid);
+            f.add(new JLabel("Amount (VND):")); f.add(tfAmt);
             f.add(new JLabel("Due_Date (YYYY-MM-DD):")); f.add(tfDue);
             f.add(new JLabel("Payment_Status:")); f.add(tfStatus);
             f.add(new JLabel("Paid_Date (YYYY-MM-DD or blank):")); f.add(tfPaid);
