@@ -1,4 +1,4 @@
-drop database IF exists vehiclemanagement;
+DROP DATABASE IF EXISTS vehiclemanagement;
 CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
@@ -114,16 +114,12 @@ CREATE TABLE TRAFFICVIOLATION (
 );
 
 CREATE TABLE FINE (
-    Fine_Num INT NOT NULL,
     Violate_ID INT NOT NULL,
     Amount DECIMAL(10,2),
     Due_Date DATE,
     Payment_Status VARCHAR(30),
     Paid_Date DATE,
-    PRIMARY KEY (Fine_Num, Violate_ID),
+    PRIMARY KEY (Violate_ID),
     FOREIGN KEY (Violate_ID) REFERENCES TRAFFICVIOLATION(Violate_ID)
 		ON DELETE CASCADE
 );
-
--- check table
-SHOW TABLES;

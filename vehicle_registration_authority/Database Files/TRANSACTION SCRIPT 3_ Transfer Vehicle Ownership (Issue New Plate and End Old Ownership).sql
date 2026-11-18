@@ -1,3 +1,4 @@
+-- TRANSACTION SCRIPT 3: Transfer Vehicle OwnerShip
 USE VehicleManagement;
 DROP PROCEDURE IF EXISTS sp_TransferVehicleOwnership;
 DELIMITER //
@@ -20,7 +21,7 @@ BEGIN
     START TRANSACTION;
 
         -- 1. Close active ownership (wrapped in derived table 'temp' to prevent MySQL Error 1093)
-        UPDATE Ownership 
+        UPDATE Ownership
         SET End_Date = CURDATE(), Transfer_Type = 'Transfer Out'
         WHERE Ownership_ID > 0 AND End_Date IS NULL AND Owner_ID IN (
             SELECT Owner_ID FROM (SELECT Owner_ID FROM Ownership) AS temp
