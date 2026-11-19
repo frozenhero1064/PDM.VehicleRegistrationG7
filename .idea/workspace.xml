@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="93e3afbf-bc4a-4386-87c0-cfebd90ba01c" name="Changes" comment="Database Fixes (violations, Procedures)">
+      <change beforePath="$PROJECT_DIR$/vehicle_registration_authority/src/main/java/MainFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/vehicle_registration_authority/src/main/java/MainFrame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vehicle_registration_authority/target/classes/MainFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/vehicle_registration_authority/target/classes/MainFrame.class" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Java" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;MadCoderOfTerra&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/frozenhero1064/PDM.VehicleRegistrationG7&quot;,
+    &quot;accountId&quot;: &quot;05cfefc7-b198-4c97-a156-cefdea8d5b48&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3KmY2hPfwhT92vu9EW3ZnFO9Wgy" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.MainFrame.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Java&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/table/Documents/code/Vehicle_Registration/PDM.VehicleRegistrationG7&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority\Database Files" />
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority\src\main\java" />
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="93e3afbf-bc4a-4386-87c0-cfebd90ba01c" name="Changes" comment="" />
+      <created>1792164004464</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1792164004464</updated>
+    </task>
+    <task id="LOCAL-00001" summary="fixed the ownerID | Owner_ID and Indentity Typo">
+      <option name="closed" value="true" />
+      <created>1794493736606</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1794493736606</updated>
+    </task>
+    <task id="LOCAL-00002" summary="fixed the typo again bruh">
+      <option name="closed" value="true" />
+      <created>1794495928621</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1794495928621</updated>
+    </task>
+    <task id="LOCAL-00003" summary="fixed the typo again +1">
+      <option name="closed" value="true" />
+      <created>1794900709394</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1794900709394</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Fixed Typos">
+      <option name="closed" value="true" />
+      <created>1794967784094</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1794967784094</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fixed the Fine Weak Entity and Removed the refresh buttons on all tabs cuz don't think it's needed and look no good">
+      <option name="closed" value="true" />
+      <created>1794971292497</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1794971292497</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Database Fixes (violations, Procedures)">
+      <option name="closed" value="true" />
+      <created>1794971710510</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1794971710510</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixed the ownerID | Owner_ID and Indentity Typo" />
+    <MESSAGE value="fixed the typo again bruh" />
+    <MESSAGE value="fixed the typo again +1" />
+    <MESSAGE value="Fixed Typos" />
+    <MESSAGE value="Fixed the Fine Weak Entity and Removed the refresh buttons on all tabs cuz don't think it's needed and look no good" />
+    <MESSAGE value="Database Fixes (violations, Procedures)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Database Fixes (violations, Procedures)" />
+  </component>
+</project>
