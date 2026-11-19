@@ -117,11 +117,13 @@ CREATE TABLE Owner_phone (
 CREATE TABLE Ownership (
     Ownership_ID INT NOT NULL,
     Owner_ID INT NOT NULL,
+    Plate_Num VARCHAR(40) NOT NULL,
     Start_Date DATE,
     End_Date DATE,
     Transfer_Type VARCHAR(100),
     PRIMARY KEY (Ownership_ID),
     FOREIGN KEY (Owner_ID) REFERENCES Owner(Owner_ID)
+    FOREIGN KEY (Plate_Num) REFERENCES VEHINCLE(Plate_Num) 
 );
 
 CREATE TABLE REGISTRATION (
