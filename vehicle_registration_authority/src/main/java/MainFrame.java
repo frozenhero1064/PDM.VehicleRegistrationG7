@@ -501,7 +501,7 @@ public class MainFrame extends JFrame {
         topBar.add(btEdit);
         topBar.add(btRemove);
 
-        String[] columns = {"Plate_Num", "Chassis_Num", "Engine_Num", "Brand", "Model", "YOM", "Color", "Type", "Previous_Plate_Num"};
+        String[] columns = {"Plate Number", "Chassis Number", "Engine Number", "Brand", "Model", "YOM", "Color", "Type", "Previous Plate Number"};
         vehicleTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -650,7 +650,7 @@ public class MainFrame extends JFrame {
         topBar.add(btContacts);
         topBar.add(btRemove);
 
-        String[] cols = {"OwnerID", "Category", "Identity_Card / Tax_Code", "Full Name / Company", "Street", "District", "City"};
+        String[] cols = {"OwnerID", "Category", "Identity Card / Tax Code", "Full Name / Company", "Street", "District", "City"};
         ownerTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -806,7 +806,7 @@ public class MainFrame extends JFrame {
         JButton btRemove = new JButton("Delete Record");
         top.add(btAdd); top.add(btTransferSP); top.add(btRemove);
 
-        String[] cols = {"Ownership_ID", "OwnerID", "Start_Date", "End_Date", "Transfer_Type"};
+        String[] cols = {"Ownership ID", "OwnerID", "Plate Number", "Start Date", "End Date", "Transfer Type"};
         ownershipTableModel = new DefaultTableModel(cols, 0);
         ownershipTable = new JTable(ownershipTableModel);
 
@@ -814,6 +814,7 @@ public class MainFrame extends JFrame {
             int nextId = dao.getNextIntId("Ownership", "Ownership_ID");
             JTextField tfId = new JTextField(String.valueOf(nextId));
             JComboBox<String> cbOwner = createOwnerComboBox();
+            JComboBox<String> cbOldPlate = createPlateComboBox();
             JTextField tfStart = new JTextField("2026-01-01");
             JTextField tfEnd = new JTextField();
             JTextField tfType = new JTextField("New Purchase");
@@ -821,6 +822,7 @@ public class MainFrame extends JFrame {
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
             f.add(new JLabel("Ownership_ID (Int *):")); f.add(tfId);
             f.add(new JLabel("Select OwnerID (*):")); f.add(cbOwner);
+            f.add(new JLabel("Select Plate Number (*):")); f.add(cbOldPlate);
             f.add(new JLabel("Start_Date (YYYY-MM-DD):")); f.add(tfStart);
             f.add(new JLabel("End_Date (YYYY-MM-DD or blank):")); f.add(tfEnd);
             f.add(new JLabel("Transfer_Type:")); f.add(tfType);
@@ -830,8 +832,8 @@ public class MainFrame extends JFrame {
                     Date endDate = tfEnd.getText().trim().isEmpty() ? null : Date.valueOf(tfEnd.getText().trim());
                     int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
                     dao.executeUpdate(
-                            "INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?)",
-                            Integer.parseInt(tfId.getText().trim()), ownerId,
+                            "INSERT INTO Ownership (Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type) VALUES (?, ?, ?, ?, ?, ?)",
+                            Integer.parseInt(tfId.getText().trim()), ownerId, cbOldPlate.getSelectedItem().toString().trim(),
                             Date.valueOf(tfStart.getText().trim()), endDate, tfType.getText().trim()
                     );
                     loadOwnershipsFromDatabase();
@@ -881,7 +883,7 @@ public class MainFrame extends JFrame {
     private void loadOwnershipsFromDatabase() {
         ownershipTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 5)) {
+            for (Object[] r : dao.queryTable("SELECT Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 6)) {
                 ownershipTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Ownership load note: " + ex.getMessage()); }
@@ -894,7 +896,7 @@ public class MainFrame extends JFrame {
         JButton btRemove = new JButton("Remove Certificate");
         top.add(btAdd); top.add(btRemove);
 
-        String[] cols = {"Registration_ID", "Registration_Date", "Expiry_Date", "Status", "Issued_By", "Plate_Num"};
+        String[] cols = {"Registration ID", "Registration Date", "Expiry Date", "Status", "Issued By", "Plate Number"};
         registrationTableModel = new DefaultTableModel(cols, 0);
         registrationTable = new JTable(registrationTableModel);
 
@@ -950,7 +952,7 @@ public class MainFrame extends JFrame {
         JButton btRemove = new JButton("Remove Policy");
         top.add(btAdd); top.add(btRemove);
 
-        String[] cols = {"Policy_Num", "Policy_Name", "Start_Date", "End_Date", "Insurance Type", "Plate_Num"};
+        String[] cols = {"Policy Number", "Policy Name", "Start Date", "End Date", "Insurance Type", "Plate Number"};
         insuranceTableModel = new DefaultTableModel(cols, 0);
         insuranceTable = new JTable(insuranceTableModel);
 
@@ -1005,7 +1007,7 @@ public class MainFrame extends JFrame {
         JButton btRemove = new JButton("Remove Inspection");
         top.add(btAdd); top.add(btRemove);
 
-        String[] cols = {"Inspection_ID", "Inspection_Date", "Result", "Inspector_Name", "Expiry_Date", "Notes", "Plate_Num"};
+        String[] cols = {"Inspection ID", "Inspection Date", "Result", "Inspector Name", "Expiry Date", "Notes", "Plate Number"};
         inspectionTableModel = new DefaultTableModel(cols, 0);
         inspectionTable = new JTable(inspectionTableModel);
 

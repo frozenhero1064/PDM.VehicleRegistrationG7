@@ -65,11 +65,13 @@ CREATE TABLE Owner_phone (
 CREATE TABLE Ownership (
     Ownership_ID INT NOT NULL,
     OwnerID INT NOT NULL,
+    Plate_Num VARCHAR(20),
     Start_Date DATE,
     End_Date DATE,
     Transfer_Type VARCHAR(100),
     PRIMARY KEY (Ownership_ID),
-    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID),
+    FOREIGN KEY (Plate_Num) REFERENCES Vehicle(Plate_Num)
 );
 
 CREATE TABLE REGISTRATION (
@@ -418,8 +420,6 @@ END //
 
 DELIMITER ;
 
-
--- TRANSACTION SCRIPT 3: Transfer Vehicle OwnerShip
 USE VehicleManagement;
 DROP PROCEDURE IF EXISTS sp_TransferVehicleOwnership;
 DELIMITER //
