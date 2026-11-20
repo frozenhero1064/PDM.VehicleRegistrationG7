@@ -999,12 +999,12 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Policy Num:")); f.add(tfNum);
+            f.add(new JLabel("Policy Number:")); f.add(tfNum);
             f.add(new JLabel("Policy Name:")); f.add(tfName);
             f.add(new JLabel("Start Date (YYYY-MM-DD):")); f.add(tfStart);
             f.add(new JLabel("End Date (YYYY-MM-DD):")); f.add(tfEnd);
             f.add(new JLabel("Insurance Type:")); f.add(tfType);
-            f.add(new JLabel("Select Vehicle Plate Num:")); f.add(cbPlate);
+            f.add(new JLabel("Select Vehicle Plate Number:")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Insurance Policy", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
