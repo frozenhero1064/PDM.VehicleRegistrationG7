@@ -549,7 +549,7 @@ public class MainFrame extends JFrame {
                 } catch (SQLException ex) { showDbError(ex); }
             }
         });
-        btRefresh.addActionListener(e -> {loadVehiclesFromDatabase("");});
+        btRefresh.addActionListener(e -> {refreshAllTabs();});
 
         panel.add(topBar, BorderLayout.NORTH);
         panel.add(new JScrollPane(vehicleTable), BorderLayout.CENTER);
@@ -932,27 +932,10 @@ public class MainFrame extends JFrame {
             f.add(new JLabel("Issued By:")); f.add(tfIssued);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Registration", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                String engineNum = "";
-                String chassisNum = cbChassis.getSelectedItem().toString().trim();
-
-                try (Connection conn = dao.getConnection();
-                     PreparedStatement ps = conn.prepareStatement("SELECT Engine_Num FROM VEHICLE WHERE Chassis_Num = ?")) {
-
-                    ps.setString(1, chassisNum);
-
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            engineNum = rs.getString("Engine_Num");
-                        }
-                    }
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-
                 try {
                     dao.executeUpdate(
                             "INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Issued_By) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfPlate.getText().trim(), cbChassis.getSelectedItem().toString().trim(), engineNum, Date.valueOf(tfRegDate.getText().trim()), Date.valueOf(tfExpDate.getText().trim()),
+                            tfPlate.getText().trim(), cbChassis.getSelectedItem().toString().trim(), "", Date.valueOf(tfRegDate.getText().trim()), Date.valueOf(tfExpDate.getText().trim()),
                             tfIssued.getText().trim()
                     );
                     loadRegistrationsFromDatabase();
@@ -969,6 +952,7 @@ public class MainFrame extends JFrame {
     private void loadRegistrationsFromDatabase() {
         registrationTableModel.setRowCount(0);
         try {
+            dao.executeUpdate("UPDATE REGISTRATION r JOIN VEHICLE v ON r.Chassis_Num = v.Chassis_Num SET r.Engine_Num = v.Engine_Num");
             dao.executeUpdate("UPDATE REGISTRATION SET Status = CASE " + "WHEN Expiry_Date < CURDATE() THEN 'Expired' ELSE 'Active' END");
         } catch (SQLException ex) { System.out.println("Registration Status update note: " + ex.getMessage()); }
 
