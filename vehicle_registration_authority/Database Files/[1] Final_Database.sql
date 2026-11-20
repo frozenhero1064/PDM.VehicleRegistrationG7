@@ -17,7 +17,7 @@ CREATE TABLE VEHICLE (
 CREATE TABLE REGISTRATION (
 	Plate_Num VARCHAR(20) PRIMARY KEY,
     Chassis_Num VARCHAR(50) UNIQUE,
-    Engine_Num VARCHAR(50),
+    Engine_Num VARCHAR(50) UNIQUE,
     Registration_Date DATE,
     Expiry_Date DATE,
     Status VARCHAR(30),
