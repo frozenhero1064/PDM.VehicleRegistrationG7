@@ -575,6 +575,7 @@ public class MainFrame extends JFrame {
         }
 
         JTextField tfChassis = new JTextField(isEdit ? strVal(vehicleTableModel, row, 0) : "");
+        tfChassis.setEditable(!isEdit);
         JTextField tfEngine = new JTextField(isEdit ? strVal(vehicleTableModel, row, 1) : "");
         JTextField tfBrand = new JTextField(isEdit ? strVal(vehicleTableModel, row, 2) : "");
         JTextField tfModel = new JTextField(isEdit ? strVal(vehicleTableModel, row, 3) : "");
