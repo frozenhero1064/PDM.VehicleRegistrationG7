@@ -935,7 +935,7 @@ public class MainFrame extends JFrame {
                 try {
                     dao.executeUpdate(
                             "INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Issued_By) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfPlate.getText().trim(), cbChassis.getSelectedItem().toString().trim(), "", Date.valueOf(tfRegDate.getText().trim()), Date.valueOf(tfExpDate.getText().trim()),
+                            tfPlate.getText().trim(), cbChassis.getSelectedItem().toString().trim(), " ", Date.valueOf(tfRegDate.getText().trim()), Date.valueOf(tfExpDate.getText().trim()),
                             tfIssued.getText().trim()
                     );
                     loadRegistrationsFromDatabase();

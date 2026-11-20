@@ -3,7 +3,6 @@ CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
 CREATE TABLE VEHICLE (
-    -- Plate_Num VARCHAR(20) PRIMARY KEY,
     Chassis_Num VARCHAR(50) PRIMARY KEY,
     Engine_Num VARCHAR(50) UNIQUE,
     Brand VARCHAR(50),
@@ -17,7 +16,7 @@ CREATE TABLE VEHICLE (
 
 CREATE TABLE REGISTRATION (
 	Plate_Num VARCHAR(20) PRIMARY KEY,
-    Chassis_Num VARCHAR(50),
+    Chassis_Num VARCHAR(50) UNIQUE,
     Engine_Num VARCHAR(50),
     Registration_Date DATE,
     Expiry_Date DATE,
