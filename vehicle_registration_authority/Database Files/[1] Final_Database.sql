@@ -3,16 +3,28 @@ CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
 CREATE TABLE VEHICLE (
-    Plate_Num VARCHAR(20) PRIMARY KEY,
-    Chassis_Num VARCHAR(50) UNIQUE,
+    -- Plate_Num VARCHAR(20) PRIMARY KEY,
+    Chassis_Num VARCHAR(50) PRIMARY KEY,
     Engine_Num VARCHAR(50) UNIQUE,
     Brand VARCHAR(50),
     Model VARCHAR(50),
     YOM INT,
     Color VARCHAR(30),
-    Type VARCHAR(30),
-    Previous_Plate_Num VARCHAR(20) NULL,
-    FOREIGN KEY (Previous_Plate_Num) REFERENCES VEHICLE(Plate_Num)
+    Type VARCHAR(30)
+    -- Previous_Plate_Num VARCHAR(20) NULL,
+    -- FOREIGN KEY (Previous_Plate_Num) REFERENCES VEHICLE(Plate_Num)
+);
+
+CREATE TABLE REGISTRATION (
+	Plate_Num VARCHAR(20) PRIMARY KEY,
+    Chassis_Num VARCHAR(50),
+    Engine_Num VARCHAR(50),
+    Registration_Date DATE,
+    Expiry_Date DATE,
+    Status VARCHAR(30),
+    Issued_By VARCHAR(100),
+    FOREIGN KEY (Chassis_Num) REFERENCES VEHICLE(Chassis_Num)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE Owner (
@@ -71,16 +83,7 @@ CREATE TABLE Ownership (
     Transfer_Type VARCHAR(100),
     PRIMARY KEY (Ownership_ID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID),
-    FOREIGN KEY (Plate_Num) REFERENCES Vehicle(Plate_Num)
-);
-
-CREATE TABLE REGISTRATION (
-	Plate_Num VARCHAR(20) PRIMARY KEY,
-    Registration_Date DATE,
-    Expiry_Date DATE,
-    Status VARCHAR(30),
-    Issued_By VARCHAR(100),
-    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
 );
 
 CREATE TABLE INSURANCEPOLICY (
@@ -90,7 +93,8 @@ CREATE TABLE INSURANCEPOLICY (
     End_Date DATE,
     Insurance_Type VARCHAR(50),
     Plate_Num VARCHAR(20),
-    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
+    	ON DELETE CASCADE
 );
 
 CREATE TABLE INSPECTION (
@@ -101,7 +105,8 @@ CREATE TABLE INSPECTION (
     Expiry_Date DATE,
     Notes VARCHAR(255),
     Plate_Num VARCHAR(20),
-    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE TRAFFICVIOLATION (
@@ -111,7 +116,8 @@ CREATE TABLE TRAFFICVIOLATION (
     Location VARCHAR(255),
     Description VARCHAR(255),
     Plate_Num VARCHAR(20),
-    FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
+    	ON DELETE CASCADE
 );
 
 CREATE TABLE FINE (
@@ -126,22 +132,22 @@ CREATE TABLE FINE (
 );
 
 -- 1. VEHICLE
-INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num) VALUES
-('29A-12345', 'CHS001ENG01', 'ENG100001', 'Toyota', 'Vios', 2018, 'White', 'Sedan', NULL),
-('30F-54321', 'CHS002ENG02', 'ENG100002', 'Honda', 'Civic', 2020, 'Black', 'Sedan', NULL),
-('51G-99887', 'CHS003ENG03', 'ENG100003', 'Mazda', 'CX-5', 2021, 'Red', 'SUV', NULL),
-('43C-11223', 'CHS004ENG04', 'ENG100004', 'Ford', 'Ranger', 2019, 'Blue', 'Pickup', NULL),
-('60B-33445', 'CHS005ENG05', 'ENG100005', 'Hyundai', 'Accent', 2022, 'Silver', 'Sedan', NULL),
-('51H-66778', 'CHS006ENG06', 'ENG100006', 'VinFast', 'VF8', 2023, 'Green', 'SUV', NULL),
-('29C-44556', 'CHS007ENG07', 'ENG100007', 'Toyota', 'Fortuner', 2017, 'Black', 'SUV', NULL),
-('30G-77889', 'CHS008ENG08', 'ENG100008', 'Kia', 'Morning', 2018, 'Yellow', 'Hatchback', NULL),
-('51F-13579', 'CHS009ENG09', 'ENG100009', 'Mercedes', 'C200', 2021, 'White', 'Sedan', NULL),
-('61D-24680', 'CHS010ENG10', 'ENG100010', 'BMW', 'X5', 2022, 'Black', 'SUV', NULL),
-('15A-98765', 'CHS011ENG11', 'ENG100011', 'Honda', 'City', 2019, 'Gray', 'Sedan', NULL),
-('37B-55443', 'CHS012ENG12', 'ENG100012', 'Hyundai', 'Santa Fe', 2020, 'White', 'SUV', NULL),
-('51K-11122', 'CHS013ENG13', 'ENG100013', 'VinFast', 'VF e34', 2022, 'Blue', 'SUV', NULL),
-('29D-33221', 'CHS014ENG14', 'ENG100014', 'Toyota', 'Camry', 2021, 'Black', 'Sedan', '29A-12345'),
-('30E-99001', 'CHS015ENG15', 'ENG100015', 'Ford', 'Transit', 2018, 'White', 'Van', NULL);
+INSERT INTO VEHICLE (Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type) VALUES
+('CHS001ENG01', 'ENG100001', 'Toyota', 'Vios', 2018, 'White', 'Sedan'),
+('CHS002ENG02', 'ENG100002', 'Honda', 'Civic', 2020, 'Black', 'Sedan'),
+('CHS003ENG03', 'ENG100003', 'Mazda', 'CX-5', 2021, 'Red', 'SUV'),
+('CHS004ENG04', 'ENG100004', 'Ford', 'Ranger', 2019, 'Blue', 'Pickup'),
+('CHS005ENG05', 'ENG100005', 'Hyundai', 'Accent', 2022, 'Silver', 'Sedan'),
+('CHS006ENG06', 'ENG100006', 'VinFast', 'VF8', 2023, 'Green', 'SUV'),
+('CHS007ENG07', 'ENG100007', 'Toyota', 'Fortuner', 2017, 'Black', 'SUV'),
+('CHS008ENG08', 'ENG100008', 'Kia', 'Morning', 2018, 'Yellow', 'Hatchback'),
+('CHS009ENG09', 'ENG100009', 'Mercedes', 'C200', 2021, 'White', 'Sedan'),
+('CHS010ENG10', 'ENG100010', 'BMW', 'X5', 2022, 'Black', 'SUV'),
+('CHS011ENG11', 'ENG100011', 'Honda', 'City', 2019, 'Gray', 'Sedan'),
+('CHS012ENG12', 'ENG100012', 'Hyundai', 'Santa Fe', 2020, 'White', 'SUV'),
+('CHS013ENG13', 'ENG100013', 'VinFast', 'VF e34', 2022, 'Blue', 'SUV'),
+('CHS014ENG14', 'ENG100014', 'Toyota', 'Camry', 2021, 'Black', 'Sedan'),
+('CHS015ENG15', 'ENG100015', 'Ford', 'Transit', 2018, 'White', 'Van');
 
 -- 2. OWNER
 INSERT INTO Owner (OwnerID, Street, District, City) VALUES
@@ -237,22 +243,22 @@ INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Typ
 (15, 15, '2018-06-15', NULL, 'New Purchase');
 
 -- 8. REGISTRATION
-INSERT INTO REGISTRATION (Plate_Num, Registration_Date, Expiry_Date, Issued_By) VALUES
-('29A-12345', '2018-03-05', '2028-03-05', 'Cuc CSGT HN'),
-('30F-54321', '2020-05-20', '2030-05-20', 'Cuc CSGT HN'),
-('51G-99887', '2021-01-15', '2031-01-15', 'Cuc CSGT DN'),
-('43C-11223', '2019-07-25', '2029-07-25', 'Cuc CSGT CT'),
-('60B-33445', '2022-02-15', '2032-02-15', 'Cuc CSGT HP'),
-('51H-66778', '2023-04-10', '2033-04-10', 'Cuc CSGT HN'),
-('29C-44556', '2017-08-25', '2027-08-25', 'Cuc CSGT HN'),
-('30G-77889', '2018-10-15', '2028-10-15', 'Cuc CSGT HN'),
-('51F-13579', '2021-07-01', '2031-07-01', 'Cuc CSGT SG'),
-('61D-24680', '2022-09-20', '2032-09-20', 'Cuc CSGT BD'),
-('15A-98765', '2019-11-05', '2029-11-05', 'Cuc CSGT HN'),
-('37B-55443', '2020-12-15', '2025-12-15', 'Cuc CSGT HN'),
-('51K-11122', '2022-03-30', '2032-03-30', 'Cuc CSGT SG'),
-('29D-33221', '2023-01-15', '2033-01-15', 'Cuc CSGT HN'),
-('30E-99001', '2018-06-20', '2028-06-20', 'Cuc CSGT HN');
+INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Issued_By) VALUES
+('29A-12345', 'CHS001ENG01', 'ENG100001', '2018-03-05', '2028-03-05', 'Cuc CSGT HN'),
+('30F-54321', 'CHS002ENG02', 'ENG100002', '2020-05-20', '2030-05-20', 'Cuc CSGT HN'),
+('51G-99887', 'CHS003ENG03', 'ENG100003', '2021-01-15', '2031-01-15', 'Cuc CSGT DN'),
+('43C-11223', 'CHS004ENG04', 'ENG100004', '2019-07-25', '2029-07-25', 'Cuc CSGT CT'),
+('60B-33445', 'CHS005ENG05', 'ENG100005', '2022-02-15', '2032-02-15', 'Cuc CSGT HP'),
+('51H-66778', 'CHS006ENG06', 'ENG100006', '2023-04-10', '2033-04-10', 'Cuc CSGT HN'),
+('29C-44556', 'CHS007ENG07', 'ENG100007', '2017-08-25', '2027-08-25', 'Cuc CSGT HN'),
+('30G-77889', 'CHS008ENG08', 'ENG100008', '2018-10-15', '2028-10-15', 'Cuc CSGT HN'),
+('51F-13579', 'CHS009ENG09', 'ENG100009', '2021-07-01', '2031-07-01', 'Cuc CSGT SG'),
+('61D-24680', 'CHS010ENG10', 'ENG100010', '2022-09-20', '2032-09-20', 'Cuc CSGT BD'),
+('15A-98765', 'CHS011ENG11', 'ENG100011', '2019-11-05', '2029-11-05', 'Cuc CSGT HN'),
+('37B-55443', 'CHS012ENG12', 'ENG100012', '2020-12-15', '2025-12-15', 'Cuc CSGT HN'),
+('51K-11122', 'CHS013ENG13', 'ENG100013', '2022-03-30', '2032-03-30', 'Cuc CSGT SG'),
+('29D-33221', 'CHS014ENG14', 'ENG100014', '2023-01-15', '2033-01-15', 'Cuc CSGT HN'),
+('30E-99001', 'CHS015ENG15', 'ENG100015', '2018-06-20', '2028-06-20', 'Cuc CSGT HN');
 
 -- 9. INSURANCEPOLICY
 INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES
