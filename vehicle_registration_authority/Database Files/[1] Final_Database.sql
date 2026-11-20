@@ -75,12 +75,11 @@ CREATE TABLE Ownership (
 );
 
 CREATE TABLE REGISTRATION (
-    Registration_ID INT PRIMARY KEY,
+	Plate_Num VARCHAR(20) PRIMARY KEY,
     Registration_Date DATE,
     Expiry_Date DATE,
     Status VARCHAR(30),
     Issued_By VARCHAR(100),
-    Plate_Num VARCHAR(20),
     FOREIGN KEY (Plate_Num) REFERENCES VEHICLE(Plate_Num)
 );
 
@@ -238,22 +237,22 @@ INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Typ
 (15, 15, '2018-06-15', NULL, 'New Purchase');
 
 -- 8. REGISTRATION
-INSERT INTO REGISTRATION (Registration_ID, Registration_Date, Expiry_Date, Status, Issued_By, Plate_Num) VALUES
-(1, '2018-03-05', '2028-03-05', 'Active', 'Cuc CSGT HN', '29A-12345'),
-(2, '2020-05-20', '2030-05-20', 'Active', 'Cuc CSGT HN', '30F-54321'),
-(3, '2021-01-15', '2031-01-15', 'Active', 'Cuc CSGT DN', '51G-99887'),
-(4, '2019-07-25', '2029-07-25', 'Active', 'Cuc CSGT CT', '43C-11223'),
-(5, '2022-02-15', '2032-02-15', 'Active', 'Cuc CSGT HP', '60B-33445'),
-(6, '2023-04-10', '2033-04-10', 'Active', 'Cuc CSGT HN', '51H-66778'),
-(7, '2017-08-25', '2027-08-25', 'Active', 'Cuc CSGT HN', '29C-44556'),
-(8, '2018-10-15', '2028-10-15', 'Active', 'Cuc CSGT HN', '30G-77889'),
-(9, '2021-07-01', '2031-07-01', 'Active', 'Cuc CSGT SG', '51F-13579'),
-(10, '2022-09-20', '2032-09-20', 'Active', 'Cuc CSGT BD', '61D-24680'),
-(11, '2019-11-05', '2029-11-05', 'Active', 'Cuc CSGT HN', '15A-98765'),
-(12, '2020-12-15', '2030-12-15', 'Active', 'Cuc CSGT HN', '37B-55443'),
-(13, '2022-03-30', '2032-03-30', 'Active', 'Cuc CSGT SG', '51K-11122'),
-(14, '2023-01-15', '2033-01-15', 'Active', 'Cuc CSGT HN', '29D-33221'),
-(15, '2018-06-20', '2028-06-20', 'Active', 'Cuc CSGT HN', '30E-99001');
+INSERT INTO REGISTRATION (Plate_Num, Registration_Date, Expiry_Date, Issued_By) VALUES
+('29A-12345', '2018-03-05', '2028-03-05', 'Cuc CSGT HN'),
+('30F-54321', '2020-05-20', '2030-05-20', 'Cuc CSGT HN'),
+('51G-99887', '2021-01-15', '2031-01-15', 'Cuc CSGT DN'),
+('43C-11223', '2019-07-25', '2029-07-25', 'Cuc CSGT CT'),
+('60B-33445', '2022-02-15', '2032-02-15', 'Cuc CSGT HP'),
+('51H-66778', '2023-04-10', '2033-04-10', 'Cuc CSGT HN'),
+('29C-44556', '2017-08-25', '2027-08-25', 'Cuc CSGT HN'),
+('30G-77889', '2018-10-15', '2028-10-15', 'Cuc CSGT HN'),
+('51F-13579', '2021-07-01', '2031-07-01', 'Cuc CSGT SG'),
+('61D-24680', '2022-09-20', '2032-09-20', 'Cuc CSGT BD'),
+('15A-98765', '2019-11-05', '2029-11-05', 'Cuc CSGT HN'),
+('37B-55443', '2020-12-15', '2025-12-15', 'Cuc CSGT HN'),
+('51K-11122', '2022-03-30', '2032-03-30', 'Cuc CSGT SG'),
+('29D-33221', '2023-01-15', '2033-01-15', 'Cuc CSGT HN'),
+('30E-99001', '2018-06-20', '2028-06-20', 'Cuc CSGT HN');
 
 -- 9. INSURANCEPOLICY
 INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES
@@ -364,7 +363,7 @@ BEGIN
 
         -- 3. Insert Registration
         INSERT INTO REGISTRATION (Registration_ID, Registration_Date, Expiry_Date, Status, Issued_By, Plate_Num)
-        VALUES (p_RegID, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 10 YEAR), 'Active', 'Department of Transport', p_PlateNum);
+        VALUES (p_RegID, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 10 YEAR), 'Department of Transport', p_PlateNum);
 
         -- 4. Insert Insurance Policy
         INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num)
