@@ -503,7 +503,6 @@ public class MainFrame extends JFrame {
         tfVehicleSearch = new JTextField(14);
         JButton btSearch = new JButton("Search");
         JButton btAdd = new JButton("Add Vehicle");
-        //JButton btFullReg = new JButton("Full Register");
         JButton btEdit = new JButton("Edit Selected");
         JButton btRemove = new JButton("Remove Vehicle");
         JButton btRefresh = new JButton("Refresh");
@@ -512,7 +511,6 @@ public class MainFrame extends JFrame {
         topBar.add(tfVehicleSearch);
         topBar.add(btSearch);
         topBar.add(btAdd);
-        //topBar.add(btFullReg);
         topBar.add(btEdit);
         topBar.add(btRemove);
         topBar.add(btRefresh);
@@ -526,7 +524,6 @@ public class MainFrame extends JFrame {
 
         btSearch.addActionListener(e -> loadVehiclesFromDatabase(tfVehicleSearch.getText()));
         btAdd.addActionListener(e -> showVehicleDialog(false));
-        //btFullReg.addActionListener(e -> showFullRegisterSPDialog());
         btEdit.addActionListener(e -> showVehicleDialog(true));
         btRemove.addActionListener(e -> {
             int row = vehicleTable.getSelectedRow();
@@ -605,49 +602,6 @@ public class MainFrame extends JFrame {
             } catch (Exception ex) { showDbError(ex); }
         }
     }
-
-    /*private void showFullRegisterSPDialog() {
-        int nextRegId = dao.getNextIntId("REGISTRATION", "Registration_ID");
-        JTextField tfPlate = new JTextField("51G-" + (10000 + nextRegId));
-        JTextField tfChassis = new JTextField("CHS0" + nextRegId + "ENG0" + nextRegId);
-        JTextField tfEngine = new JTextField("ENG1000" + nextRegId);
-        JTextField tfBrand = new JTextField("Honda");
-        JTextField tfModel = new JTextField("CR-V");
-        JTextField tfYom = new JTextField("2026");
-        JTextField tfColor = new JTextField("Black");
-        JTextField tfType = new JTextField("SUV");
-        JComboBox<String> cbOwner = createOwnerComboBox();
-        JTextField tfRegId = new JTextField(String.valueOf(nextRegId));
-        JTextField tfPolicyNum = new JTextField(String.format("POL%03d", nextRegId));
-
-        JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-        f.add(new JLabel("Plate Number:")); f.add(tfPlate);
-        f.add(new JLabel("Chassis Number:")); f.add(tfChassis);
-        f.add(new JLabel("Engine Number:")); f.add(tfEngine);
-        f.add(new JLabel("Brand:")); f.add(tfBrand);
-        f.add(new JLabel("Model:")); f.add(tfModel);
-        f.add(new JLabel("YOM:")); f.add(tfYom);
-        f.add(new JLabel("Color:")); f.add(tfColor);
-        f.add(new JLabel("Type:")); f.add(tfType);
-        f.add(new JLabel("Select Existing OwnerID:")); f.add(cbOwner);
-        f.add(new JLabel("New Registration_ID:")); f.add(tfRegId);
-        f.add(new JLabel("New Policy_Num:")); f.add(tfPolicyNum);
-
-        if (JOptionPane.showConfirmDialog(this, f, "Registration",
-                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            try {
-                int ownerId = Integer.parseInt(cbOwner.getSelectedItem().toString().trim());
-                dao.callRegisterNewVehicle(
-                        tfPlate.getText().trim(), tfChassis.getText().trim(), tfEngine.getText().trim(),
-                        tfBrand.getText().trim(), tfModel.getText().trim(), Integer.parseInt(tfYom.getText().trim()),
-                        tfColor.getText().trim(), tfType.getText().trim(), ownerId,
-                        Integer.parseInt(tfRegId.getText().trim()), tfPolicyNum.getText().trim()
-                );
-                refreshAllTabs();
-                JOptionPane.showMessageDialog(this, "sp_RegisterNewVehicle executed successfully!");
-            } catch (Exception ex) { showDbError(ex); }
-        }
-    } */
 
     private JPanel createOwnerTab() {
         JPanel panel = new JPanel(new BorderLayout());
