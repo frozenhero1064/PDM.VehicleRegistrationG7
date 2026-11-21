@@ -863,10 +863,10 @@ public class MainFrame extends JFrame {
             JTextField tfNewIssuedBy = new JTextField("Cuc CSGT HN");
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Select Old Plate_Num:")); f.add(cbOldPlate);
-            f.add(new JLabel("New Plate_Num:")); f.add(tfNewPlate);
-            f.add(new JLabel("Select New OwnerID:")); f.add(cbNewOwner);
-            f.add(new JLabel("New Ownership_ID:")); f.add(tfNewOwnId);
+            f.add(new JLabel("Select Old Plate Number:")); f.add(cbOldPlate);
+            f.add(new JLabel("New Plate Number:")); f.add(tfNewPlate);
+            f.add(new JLabel("Select New Owner ID:")); f.add(cbNewOwner);
+            f.add(new JLabel("New Ownership ID:")); f.add(tfNewOwnId);
             f.add(new JLabel("New Issuer:")); f.add(tfNewIssuedBy);
 
             if (JOptionPane.showConfirmDialog(this, f, "Transfer Ownership",
