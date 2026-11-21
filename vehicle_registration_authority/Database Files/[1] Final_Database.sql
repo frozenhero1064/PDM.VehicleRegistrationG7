@@ -10,20 +10,6 @@ CREATE TABLE VEHICLE (
     YOM INT,
     Color VARCHAR(30),
     Type VARCHAR(30)
-    -- Previous_Plate_Num VARCHAR(20) NULL,
-    -- FOREIGN KEY (Previous_Plate_Num) REFERENCES VEHICLE(Plate_Num)
-);
-
-CREATE TABLE REGISTRATION (
-	Plate_Num VARCHAR(20) PRIMARY KEY,
-    Chassis_Num VARCHAR(50) UNIQUE,
-    Engine_Num VARCHAR(50) UNIQUE,
-    Registration_Date DATE,
-    Expiry_Date DATE,
-    Status VARCHAR(30),
-    Issued_By VARCHAR(100),
-    FOREIGN KEY (Chassis_Num) REFERENCES VEHICLE(Chassis_Num)
-		ON DELETE CASCADE
 );
 
 CREATE TABLE Owner (
@@ -70,6 +56,20 @@ CREATE TABLE Owner_phone (
     Phone VARCHAR(20) NOT NULL,
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
+);
+
+CREATE TABLE REGISTRATION (
+	Plate_Num VARCHAR(20) PRIMARY KEY,
+    Chassis_Num VARCHAR(50),
+    Engine_Num VARCHAR(50),
+    Registration_Date DATE,
+    Expiry_Date DATE,
+    Status VARCHAR(30),
+    Issued_By VARCHAR(100),
+    FOREIGN KEY (Chassis_Num) REFERENCES VEHICLE(Chassis_Num)
+		ON DELETE CASCADE,
+	FOREIGN KEY (Engine_Num) REFERENCES VEHICLE(Engine_Num)
 		ON DELETE CASCADE
 );
 
@@ -223,25 +223,7 @@ INSERT INTO Owner_phone (OwnerID, Phone) VALUES
 (14, '02854155555'),
 (15, '02538383838');
 
--- 7. OWNERSHIP
-INSERT INTO Ownership (Ownership_ID, OwnerID, Start_Date, End_Date, Transfer_Type) VALUES
-(1, 1, '2018-03-01', NULL, 'New Purchase'),
-(2, 2, '2020-05-15', NULL, 'New Purchase'),
-(3, 3, '2021-01-10', NULL, 'New Purchase'),
-(4, 4, '2019-07-20', NULL, 'New Purchase'),
-(5, 5, '2022-02-11', NULL, 'New Purchase'),
-(6, 6, '2023-04-05', NULL, 'New Purchase'),
-(7, 7, '2017-08-19', NULL, 'New Purchase'),
-(8, 8, '2018-10-10', NULL, 'New Purchase'),
-(9, 9, '2021-06-30', NULL, 'New Purchase'),
-(10, 10, '2022-09-14', NULL, 'New Purchase'),
-(11, 11, '2019-11-01', NULL, 'New Purchase'),
-(12, 12, '2020-12-12', NULL, 'New Purchase'),
-(13, 13, '2022-03-25', NULL, 'New Purchase'),
-(14, 14, '2021-08-08', '2023-01-10', 'Transfer'),
-(15, 15, '2018-06-15', NULL, 'New Purchase');
-
--- 8. REGISTRATION
+-- 7. REGISTRATION
 INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Issued_By) VALUES
 ('29A-12345', 'CHS001ENG01', 'ENG100001', '2018-03-05', '2028-03-05', 'Cuc CSGT HN'),
 ('30F-54321', 'CHS002ENG02', 'ENG100002', '2020-05-20', '2030-05-20', 'Cuc CSGT HN'),
@@ -258,6 +240,24 @@ INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date,
 ('51K-11122', 'CHS013ENG13', 'ENG100013', '2022-03-30', '2032-03-30', 'Cuc CSGT SG'),
 ('29D-33221', 'CHS014ENG14', 'ENG100014', '2023-01-15', '2033-01-15', 'Cuc CSGT HN'),
 ('30E-99001', 'CHS015ENG15', 'ENG100015', '2018-06-20', '2028-06-20', 'Cuc CSGT HN');
+
+-- 8. OWNERSHIP
+INSERT INTO Ownership (Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type) VALUES
+(1,  1,  '51H-66778', '2018-03-01', NULL, 'New Purchase'),
+(2,  2,  '29D-33221', '2020-05-15', NULL, 'New Purchase'),
+(3,  3,  '30E-99001', '2021-01-10', NULL, 'New Purchase'),
+(4,  4,  '51F-13579', '2019-07-20', NULL, 'New Purchase'),
+(5,  5,  '29A-12345', '2022-02-11', NULL, 'New Purchase'),
+(6,  6,  '61D-24680', '2023-04-05', NULL, 'New Purchase'),
+(7,  7,  '43C-11223', '2017-08-19', NULL, 'New Purchase'),
+(8,  8,  '51K-11122', '2018-10-10', NULL, 'New Purchase'),
+(9,  9,  '30F-54321', '2021-06-30', NULL, 'New Purchase'),
+(10, 10, '37B-55443', '2022-09-14', NULL, 'New Purchase'),
+(11, 11, '60B-33445', '2019-11-01', NULL, 'New Purchase'),
+(12, 12, '15A-98765', '2020-12-12', NULL, 'New Purchase'),
+(13, 13, '29C-44556', '2022-03-25', NULL, 'New Purchase'),
+(14, 14, '51G-99887', '2021-08-08', NULL, 'New Purchase'),
+(15, 15, '30G-77889', '2018-06-15', NULL, 'New Purchase');
 
 -- 9. INSURANCEPOLICY
 INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES
@@ -346,7 +346,6 @@ CREATE PROCEDURE sp_RegisterNewVehicle(
     IN p_Color VARCHAR(30),
     IN p_Type VARCHAR(30),
     IN p_OwnerID INT,
-    IN p_RegID INT,
     IN p_PolicyNum VARCHAR(30)
 )
 BEGIN
@@ -429,12 +428,11 @@ DROP PROCEDURE IF EXISTS sp_TransferVehicleOwnership;
 DELIMITER //
 
 CREATE PROCEDURE sp_TransferVehicleOwnership(
-    IN p_OldPlate VARCHAR(20),
+	IN p_OldPlate VARCHAR(20),
     IN p_NewPlate VARCHAR(20),
-    IN p_NewChassis VARCHAR(50),
-    IN p_NewEngine VARCHAR(50),
     IN p_NewOwnerID INT,
-    IN p_NewOwnershipID INT
+    IN p_NewOwnershipID INT,
+    IN p_NewIssuedBy VARCHAR(100)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -445,26 +443,24 @@ BEGIN
 
     START TRANSACTION;
 
-        -- 1. Close active ownership (wrapped in derived table 'temp' to prevent MySQL Error 1093)
-        UPDATE Ownership
-        SET End_Date = CURDATE(), Transfer_Type = 'Transfer Out'
-        WHERE Ownership_ID > 0 AND End_Date IS NULL AND Owner_ID IN (
-            SELECT Owner_ID FROM (SELECT Owner_ID FROM Ownership) AS temp
-        );
-
-        -- 2. Insert new vehicle record referencing previous plate
-        INSERT INTO VEHICLE (Plate_Num, Chassis_Num, Engine_Num, Brand, Model, YOM, Color, Type, Previous_Plate_Num)
-        SELECT p_NewPlate, p_NewChassis, p_NewEngine, Brand, Model, YOM, Color, Type, p_OldPlate
-        FROM VEHICLE WHERE Plate_Num = p_OldPlate;
-
-        -- 3. Create new ownership link
-        INSERT INTO Ownership (Ownership_ID, Owner_ID, Start_Date, End_Date, Transfer_Type)
-        VALUES (p_NewOwnershipID, p_NewOwnerID, CURDATE(), NULL, 'Transfer In');
-
-        -- 4. Update registration status of old plate to Transferred
-        UPDATE REGISTRATION
-        SET Status = 'Transferred'
+		-- Set the old registration to transfered
+		UPDATE REGISTRATION
+        SET Status = "Transfered"
         WHERE Plate_Num = p_OldPlate;
+
+        -- Add new registration for the new plate for same vehicle
+        INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Status, Issued_By)
+        SELECT p_NewPlate, Chassis_Num, Engine_Num, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 10 YEAR), "Active", p_NewIssuedBy
+        FROM REGISTRATION WHERE Plate_Num = p_OldPlate;
+
+        -- Set the old ownership to not owned anymore
+        UPDATE Ownership
+        SET End_Date = CURDATE(), Transfer_Type = "Transfered"
+        WHERE Plate_Num = p_OldPlate AND Ownership_ID > 0;
+
+        -- Create new ownership link
+        INSERT INTO Ownership (Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type)
+        VALUES (p_NewOwnershipID, p_NewOwnerID, p_NewPlate, CURDATE(), NULL, 'Transfer In');
 
     COMMIT;
 END //

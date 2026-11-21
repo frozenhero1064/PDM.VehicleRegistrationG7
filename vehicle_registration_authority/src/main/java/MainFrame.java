@@ -380,17 +380,15 @@ public class MainFrame extends JFrame {
             }
         }
 
-        public void callTransferOwnership(String oldPlate, String newPlate, String newChassis,
-                                          String newEngine, int newOwnerId, int newOwnershipId) throws SQLException {
-            String sql = "{CALL sp_TransferVehicleOwnership(?, ?, ?, ?, ?, ?)}";
+        public void callTransferOwnership(String oldPlate, String newPlate, int newOwnerId, int newOwnershipId, String newIssuedBy) throws SQLException {
+            String sql = "{CALL sp_TransferVehicleOwnership(?, ?, ?, ?, ?)}";
             try (Connection conn = getConnection();
                  CallableStatement cs = conn.prepareCall(sql)) {
                 cs.setString(1, oldPlate);
                 cs.setString(2, newPlate);
-                cs.setString(3, newChassis);
-                cs.setString(4, newEngine);
-                cs.setInt(5, newOwnerId);
-                cs.setInt(6, newOwnershipId);
+                cs.setInt(3, newOwnerId);
+                cs.setInt(4, newOwnershipId);
+                cs.setString(5, newIssuedBy);
                 cs.execute();
             }
         }
@@ -860,30 +858,27 @@ public class MainFrame extends JFrame {
             int nextOwnId = dao.getNextIntId("Ownership", "Ownership_ID");
             JComboBox<String> cbOldPlate = createPlateComboBox();
             JTextField tfNewPlate = new JTextField("51H-" + (20000 + nextOwnId));
-            JTextField tfNewChassis = new JTextField("CHS999ENG" + nextOwnId);
-            JTextField tfNewEngine = new JTextField("ENG9999" + nextOwnId);
             JComboBox<String> cbNewOwner = createOwnerComboBox();
             JTextField tfNewOwnId = new JTextField(String.valueOf(nextOwnId));
+            JTextField tfNewIssuedBy = new JTextField("Cuc CSGT HN");
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
             f.add(new JLabel("Select Old Plate_Num:")); f.add(cbOldPlate);
             f.add(new JLabel("New Plate_Num:")); f.add(tfNewPlate);
-            f.add(new JLabel("New Chassis_Num:")); f.add(tfNewChassis);
-            f.add(new JLabel("New Engine_Num:")); f.add(tfNewEngine);
             f.add(new JLabel("Select New OwnerID:")); f.add(cbNewOwner);
             f.add(new JLabel("New Ownership_ID:")); f.add(tfNewOwnId);
+            f.add(new JLabel("New Issuer:")); f.add(tfNewIssuedBy);
 
-            if (JOptionPane.showConfirmDialog(this, f, "Transaction Script 3: sp_TransferVehicleOwnership",
+            if (JOptionPane.showConfirmDialog(this, f, "Transfer Ownership",
                     JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.callTransferOwnership(
                             cbOldPlate.getSelectedItem().toString().trim(), tfNewPlate.getText().trim(),
-                            tfNewChassis.getText().trim(), tfNewEngine.getText().trim(),
                             Integer.parseInt(cbNewOwner.getSelectedItem().toString().trim()),
-                            Integer.parseInt(tfNewOwnId.getText().trim())
+                            Integer.parseInt(tfNewOwnId.getText().trim()), tfNewIssuedBy.getText().trim()
                     );
                     refreshAllTabs();
-                    JOptionPane.showMessageDialog(this, "sp_TransferVehicleOwnership executed successfully!");
+                    JOptionPane.showMessageDialog(this, "Transfered Vehicle Ownership successfully!");
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
