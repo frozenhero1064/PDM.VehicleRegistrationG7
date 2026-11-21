@@ -935,7 +935,7 @@ public class MainFrame extends JFrame {
                 } catch (Exception ex) { showDbError(ex); }
             }
         });
-        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(registrationTable, registrationTableModel, "REGISTRATION", "Plate_Num", this::loadRegistrationsFromDatabase));
+        btRemove.addActionListener(e -> removeSelectedRowByIntOrStr(registrationTable, registrationTableModel, "REGISTRATION", "Plate_Num", this::refreshAllTabs));
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(registrationTable), BorderLayout.CENTER);
