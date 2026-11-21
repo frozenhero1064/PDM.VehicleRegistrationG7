@@ -503,7 +503,7 @@ public class MainFrame extends JFrame {
         tfVehicleSearch = new JTextField(14);
         JButton btSearch = new JButton("Search");
         JButton btAdd = new JButton("Add Vehicle");
-        JButton btFullReg = new JButton("Full Register");
+        //JButton btFullReg = new JButton("Full Register");
         JButton btEdit = new JButton("Edit Selected");
         JButton btRemove = new JButton("Remove Vehicle");
         JButton btRefresh = new JButton("Refresh");
@@ -512,7 +512,7 @@ public class MainFrame extends JFrame {
         topBar.add(tfVehicleSearch);
         topBar.add(btSearch);
         topBar.add(btAdd);
-        topBar.add(btFullReg);
+        //topBar.add(btFullReg);
         topBar.add(btEdit);
         topBar.add(btRemove);
         topBar.add(btRefresh);
@@ -526,7 +526,7 @@ public class MainFrame extends JFrame {
 
         btSearch.addActionListener(e -> loadVehiclesFromDatabase(tfVehicleSearch.getText()));
         btAdd.addActionListener(e -> showVehicleDialog(false));
-        btFullReg.addActionListener(e -> showFullRegisterSPDialog());
+        //btFullReg.addActionListener(e -> showFullRegisterSPDialog());
         btEdit.addActionListener(e -> showVehicleDialog(true));
         btRemove.addActionListener(e -> {
             int row = vehicleTable.getSelectedRow();
@@ -606,7 +606,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void showFullRegisterSPDialog() {
+    /*private void showFullRegisterSPDialog() {
         int nextRegId = dao.getNextIntId("REGISTRATION", "Registration_ID");
         JTextField tfPlate = new JTextField("51G-" + (10000 + nextRegId));
         JTextField tfChassis = new JTextField("CHS0" + nextRegId + "ENG0" + nextRegId);
@@ -647,7 +647,7 @@ public class MainFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "sp_RegisterNewVehicle executed successfully!");
             } catch (Exception ex) { showDbError(ex); }
         }
-    }
+    } */
 
     private JPanel createOwnerTab() {
         JPanel panel = new JPanel(new BorderLayout());
