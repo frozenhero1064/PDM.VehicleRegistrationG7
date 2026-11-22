@@ -747,7 +747,7 @@ public class MainFrame extends JFrame {
 
         top.add(btAdd); top.add(btTransferSP); top.add(btRemove); top.add(btRefresh);
 
-        String[] cols = {"Ownership ID", "OwnerID", "Plate Number", "Start Date", "End Date", "Transfer Type"};
+        String[] cols = {"Ownership ID", "OwnerID", "Plate Number", "Start Date", "End Date", "Ownership Type"};
         ownershipTableModel = new DefaultTableModel(cols, 0);
         ownershipTable = new JTable(ownershipTableModel);
 
@@ -822,7 +822,7 @@ public class MainFrame extends JFrame {
     private void loadOwnershipsFromDatabase() {
         ownershipTableModel.setRowCount(0);
         try {
-            for (Object[] r : dao.queryTable("SELECT Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Ownership_ID", 6)) {
+            for (Object[] r : dao.queryTable("SELECT Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type FROM Ownership ORDER BY Plate_Num", 6)) {
                 ownershipTableModel.addRow(r);
             }
         } catch (SQLException ex) { System.out.println("Ownership load note: " + ex.getMessage()); }
