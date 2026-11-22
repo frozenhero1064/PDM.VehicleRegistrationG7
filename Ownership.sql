@@ -1,0 +1,15 @@
+CREATE TABLE Ownership (
+    Ownership_ID INT NOT NULL AUTO_INCREMENT,
+    OwnerID INT NOT NULL,
+    Plate_Num VARCHAR(20),
+    Start_Date DATE,
+    End_Date DATE,
+    Transfer_Type VARCHAR(100),
+    PRIMARY KEY (Ownership_ID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+    	ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
+);

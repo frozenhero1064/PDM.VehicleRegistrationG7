@@ -1,12 +1,20 @@
--- TRANSACTION SCRIPT 2: Process a Traffic Fine Payment
+DELIMITER //
+
+USE VehicleManagement;
+DROP PROCEDURE IF EXISTS sp_PayFine;
 DELIMITER //
 
 CREATE PROCEDURE sp_PayFine(
-    IN p_FineNum INT,
     IN p_ViolateID INT
 )
 BEGIN
     DECLARE v_Status VARCHAR(30);
+
+    DECLARE EXIT HANDLER FOR SQLSTATE '45000'
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -19,7 +27,7 @@ BEGIN
         -- Check current payment status
         SELECT Payment_Status INTO v_Status
         FROM FINE
-        WHERE Fine_Num = p_FineNum AND Violate_ID = p_ViolateID
+        WHERE Violate_ID = p_ViolateID
         FOR UPDATE;
 
         IF v_Status = 'Paid' THEN
@@ -27,7 +35,7 @@ BEGIN
         ELSE
             UPDATE FINE
             SET Payment_Status = 'Paid', Paid_Date = CURDATE()
-            WHERE Fine_Num = p_FineNum AND Violate_ID = p_ViolateID;
+            WHERE Violate_ID = p_ViolateID;
         END IF;
 
     COMMIT;

@@ -1,0 +1,50 @@
+CREATE TABLE Owner (
+    OwnerID INT NOT NULL AUTO_INCREMENT,
+    Street VARCHAR(250),
+    District VARCHAR(250),
+    City VARCHAR(250),
+    PRIMARY KEY (OwnerID)
+);
+
+CREATE TABLE Individual (
+    OwnerID INT NOT NULL,
+    Fname VARCHAR(50) NOT NULL,
+    Mname VARCHAR(50) NOT NULL,
+    Lname VARCHAR(50) NOT NULL,
+    DoB DATE,
+    Gender VARCHAR(10),
+    Identity_Card VARCHAR(50) UNIQUE,
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE Organisation (
+    OwnerID INT NOT NULL,
+    Company_Name VARCHAR(250) NOT NULL,
+    Tax_Code VARCHAR(50) UNIQUE,
+    Represent_Name VARCHAR(250),
+    PRIMARY KEY (OwnerID),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE Owner_email (
+    OwnerID INT NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    PRIMARY KEY (OwnerID, email),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE Owner_phone (
+    OwnerID INT NOT NULL,
+    Phone VARCHAR(20) NOT NULL,
+    PRIMARY KEY (OwnerID, phone),
+    FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
+);

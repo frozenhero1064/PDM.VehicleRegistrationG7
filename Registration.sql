@@ -1,11 +1,12 @@
 CREATE TABLE REGISTRATION (
-    Registration_ID INT PRIMARY KEY,
+	Plate_Num VARCHAR(20) PRIMARY KEY,
+    Chassis_Num VARCHAR(50) UNIQUE,
+    Engine_Num VARCHAR(50) UNIQUE,
     Registration_Date DATE,
     Expiry_Date DATE,
     Status VARCHAR(30),
     Issued_By VARCHAR(100),
-    Plate_Num VARCHAR(20),
-
-    FOREIGN KEY (Plate_Num)
-        REFERENCES VEHICLE(Plate_Num)
+    FOREIGN KEY (Chassis_Num, Engine_Num) REFERENCES VEHICLE(Chassis_Num, Engine_Num)
+		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
