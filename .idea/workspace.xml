@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93e3afbf-bc4a-4386-87c0-cfebd90ba01c" name="Changes" comment="Database Fixes (violations, Procedures)">
-      <change beforePath="$PROJECT_DIR$/vehicle_registration_authority/src/main/java/MainFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/vehicle_registration_authority/src/main/java/MainFrame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vehicle_registration_authority/target/classes/MainFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/vehicle_registration_authority/target/classes/MainFrame.class" afterDir="false" />
+    <list default="true" id="93e3afbf-bc4a-4386-87c0-cfebd90ba01c" name="Changes" comment="deleted unneed stuff bruh why is the old thing here">
+      <change beforePath="$PROJECT_DIR$/Group07_VehicleRegistrationAuthority_MidtermReport.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Group07_VehicleRegistrationAuthority_Proposal.pdf" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,9 +14,22 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Java" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -41,22 +54,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.MainFrame.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Java&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/table/Documents/code/Vehicle_Registration/PDM.VehicleRegistrationG7&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.MainFrame.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "#2 on Database",
+    "ignore.preview.features.used": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/table/Downloads/mysql-connector-java-8.0.26.jar",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7" />
+      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority" />
       <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority\Database Files" />
       <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7\vehicle_registration_authority\src\main\java" />
-      <recent name="C:\Users\table\Documents\code\Vehicle_Registration\PDM.VehicleRegistrationG7" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -116,7 +137,23 @@
       <option name="project" value="LOCAL" />
       <updated>1794971710510</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="minor fixes (titles, ownership)">
+      <option name="closed" value="true" />
+      <created>1795105259912</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1795105259912</updated>
+    </task>
+    <task id="LOCAL-00008" summary="deleted unneed stuff bruh why is the old thing here">
+      <option name="closed" value="true" />
+      <created>1795107067689</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1795107067689</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -137,6 +174,8 @@
     <MESSAGE value="Fixed Typos" />
     <MESSAGE value="Fixed the Fine Weak Entity and Removed the refresh buttons on all tabs cuz don't think it's needed and look no good" />
     <MESSAGE value="Database Fixes (violations, Procedures)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Database Fixes (violations, Procedures)" />
+    <MESSAGE value="minor fixes (titles, ownership)" />
+    <MESSAGE value="deleted unneed stuff bruh why is the old thing here" />
+    <option name="LAST_COMMIT_MESSAGE" value="deleted unneed stuff bruh why is the old thing here" />
   </component>
 </project>
