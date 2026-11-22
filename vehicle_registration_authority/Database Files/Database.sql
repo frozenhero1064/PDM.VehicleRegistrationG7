@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS vehiclemanagement;
+DROP DATABASE IF EXISTS VehicleManagement;
 CREATE DATABASE IF NOT EXISTS VehicleManagement;
 USE VehicleManagement;
 
