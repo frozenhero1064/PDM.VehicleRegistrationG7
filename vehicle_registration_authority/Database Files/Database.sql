@@ -89,7 +89,7 @@ CREATE TABLE Ownership (
 );
 
 CREATE TABLE INSURANCEPOLICY (
-    Policy_Num VARCHAR(30) PRIMARY KEY,
+    Policy_Num INT PRIMARY KEY AUTO_INCREMENT,
     Policy_Name VARCHAR(100),
     Start_Date DATE,
     End_Date DATE,
@@ -100,7 +100,7 @@ CREATE TABLE INSURANCEPOLICY (
 );
 
 CREATE TABLE INSPECTION (
-    Inspection_ID INT PRIMARY KEY,
+    Inspection_ID INT PRIMARY KEY AUTO_INCREMENT,
     Inspection_Date DATE,
     Result VARCHAR(30),
     Inspector_Name VARCHAR(100),
@@ -112,7 +112,7 @@ CREATE TABLE INSPECTION (
 );
 
 CREATE TABLE TRAFFICVIOLATION (
-    Violate_ID INT PRIMARY KEY,
+    Violate_ID INT PRIMARY KEY AUTO_INCREMENT,
     Violation_Type VARCHAR(100),
     Violation_Date DATE,
     Location VARCHAR(255),
@@ -263,62 +263,62 @@ INSERT INTO Ownership (Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, T
 (15, 15, '30G-77889', '2018-06-15', NULL, 'New Purchase');
 
 -- 9. INSURANCEPOLICY
-INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES
-('POL001', 'Bao hiem TNDS 1', '2026-01-01', '2027-01-01', 'Compulsory', '29A-12345'),
-('POL002', 'Bao hiem vat chat 2', '2026-02-01', '2027-02-01', 'Comprehensive', '30F-54321'),
-('POL003', 'Bao hiem TNDS 3', '2026-03-01', '2027-03-01', 'Compulsory', '51G-99887'),
-('POL004', 'Bao hiem xe tai 4', '2026-04-01', '2027-04-01', 'Compulsory', '43C-11223'),
-('POL005', 'Bao hiem toan dien 5', '2026-05-01', '2027-05-01', 'Comprehensive', '60B-33445'),
-('POL006', 'Bao hiem xe dien 6', '2026-06-01', '2027-06-01', 'Comprehensive', '51H-66778'),
-('POL007', 'Bao hiem SUV 7', '2026-01-15', '2027-01-15', 'Compulsory', '29C-44556'),
-('POL008', 'Bao hiem mini 8', '2026-02-15', '2027-02-15', 'Compulsory', '30G-77889'),
-('POL009', 'Bao hiem Merc 9', '2026-03-15', '2027-03-15', 'Comprehensive', '51F-13579'),
-('POL010', 'Bao hiem BMW 10', '2026-04-15', '2027-04-15', 'Comprehensive', '61D-24680'),
-('POL011', 'Bao hiem Honda 11', '2026-05-15', '2027-05-15', 'Compulsory', '15A-98765'),
-('POL012', 'Bao hiem SantaFe 12', '2026-06-15', '2027-06-15', 'Comprehensive', '37B-55443'),
-('POL013', 'Bao hiem VinFast 13', '2026-01-20', '2027-01-20', 'Compulsory', '51K-11122'),
-('POL014', 'Bao hiem Camry 14', '2026-02-20', '2027-02-20', 'Comprehensive', '29D-33221'),
-('POL015', 'Bao hiem Transit 15', '2026-03-20', '2027-03-20', 'Compulsory', '30E-99001');
+INSERT INTO INSURANCEPOLICY (Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES
+('Bao hiem TNDS 1', '2026-01-01', '2027-01-01', 'Compulsory', '29A-12345'),
+('Bao hiem vat chat 2', '2026-02-01', '2027-02-01', 'Comprehensive', '30F-54321'),
+('Bao hiem TNDS 3', '2026-03-01', '2027-03-01', 'Compulsory', '51G-99887'),
+('Bao hiem xe tai 4', '2026-04-01', '2027-04-01', 'Compulsory', '43C-11223'),
+('Bao hiem toan dien 5', '2026-05-01', '2027-05-01', 'Comprehensive', '60B-33445'),
+('Bao hiem xe dien 6', '2026-06-01', '2027-06-01', 'Comprehensive', '51H-66778'),
+('Bao hiem SUV 7', '2026-01-15', '2027-01-15', 'Compulsory', '29C-44556'),
+('Bao hiem mini 8', '2026-02-15', '2027-02-15', 'Compulsory', '30G-77889'),
+('Bao hiem Merc 9', '2026-03-15', '2027-03-15', 'Comprehensive', '51F-13579'),
+('Bao hiem BMW 10', '2026-04-15', '2027-04-15', 'Comprehensive', '61D-24680'),
+('Bao hiem Honda 11', '2026-05-15', '2027-05-15', 'Compulsory', '15A-98765'),
+('Bao hiem SantaFe 12', '2026-06-15', '2027-06-15', 'Comprehensive', '37B-55443'),
+('Bao hiem VinFast 13', '2026-01-20', '2027-01-20', 'Compulsory', '51K-11122'),
+('Bao hiem Camry 14', '2026-02-20', '2027-02-20', 'Comprehensive', '29D-33221'),
+('Bao hiem Transit 15', '2026-03-20', '2027-03-20', 'Compulsory', '30E-99001');
 
 -- 10. INSPECTION
-INSERT INTO INSPECTION (Inspection_ID, Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num) VALUES
-(1, '2025-03-01', 'Pass', 'Nguyen Van Thanh', '2026-03-01', 'Standard check', '29A-12345'),
-(2, '2025-04-01', 'Pass', 'Tran Duc Bo', '2026-04-01', 'Good condition', '30F-54321'),
-(3, '2025-05-01', 'Pass', 'Le Minh Hoang', '2026-05-01', 'Standard check', '51G-99887'),
-(4, '2025-06-01', 'Pass', 'Pham Tuan', '2026-06-01', 'Good condition', '43C-11223'),
-(5, '2025-07-01', 'Pass', 'Hoang Hai', '2026-07-01', 'Standard check', '60B-33445'),
-(6, '2025-08-01', 'Pass', 'Vu Ngoc', '2026-08-01', 'EV check passed', '51H-66778'),
-(7, '2025-01-10', 'Pass', 'Dang Khoa', '2026-01-10', 'Standard check', '29C-44556'),
-(8, '2025-02-10', 'Pass', 'Bui Viet', '2026-02-10', 'Standard check', '30G-77889'),
-(9, '2025-03-10', 'Pass', 'Do Manh', '2026-03-10', 'Luxury check', '51F-13579'),
-(10, '2025-04-10', 'Pass', 'Ngo Thang', '2026-04-10', 'SUV check', '61D-24680'),
-(11, '2025-05-10', 'Pass', 'Phan Son', '2026-05-10', 'Standard check', '15A-98765'),
-(12, '2025-06-10', 'Pass', 'Trinh Long', '2026-06-10', 'Standard check', '37B-55443'),
-(13, '2025-07-10', 'Pass', 'Duong Tung', '2026-07-10', 'EV check', '51K-11122'),
-(14, '2025-08-10', 'Pass', 'Mai Linh', '2026-08-10', 'Standard check', '29D-33221'),
-(15, '2025-09-10', 'Pass', 'Dao Anh', '2026-09-10', 'Commercial check', '30E-99001');
+INSERT INTO INSPECTION (Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num) VALUES
+('2025-03-01', 'Pass', 'Nguyen Van Thanh', '2026-03-01', 'Standard check', '29A-12345'),
+('2025-04-01', 'Pass', 'Tran Duc Bo', '2026-04-01', 'Good condition', '30F-54321'),
+('2025-05-01', 'Pass', 'Le Minh Hoang', '2026-05-01', 'Standard check', '51G-99887'),
+('2025-06-01', 'Pass', 'Pham Tuan', '2026-06-01', 'Good condition', '43C-11223'),
+('2025-07-01', 'Pass', 'Hoang Hai', '2026-07-01', 'Standard check', '60B-33445'),
+('2025-08-01', 'Pass', 'Vu Ngoc', '2026-08-01', 'EV check passed', '51H-66778'),
+('2025-01-10', 'Pass', 'Dang Khoa', '2026-01-10', 'Standard check', '29C-44556'),
+('2025-02-10', 'Pass', 'Bui Viet', '2026-02-10', 'Standard check', '30G-77889'),
+('2025-03-10', 'Pass', 'Do Manh', '2026-03-10', 'Luxury check', '51F-13579'),
+('2025-04-10', 'Pass', 'Ngo Thang', '2026-04-10', 'SUV check', '61D-24680'),
+('2025-05-10', 'Pass', 'Phan Son', '2026-05-10', 'Standard check', '15A-98765'),
+('2025-06-10', 'Pass', 'Trinh Long', '2026-06-10', 'Standard check', '37B-55443'),
+('2025-07-10', 'Pass', 'Duong Tung', '2026-07-10', 'EV check', '51K-11122'),
+('2025-08-10', 'Pass', 'Mai Linh', '2026-08-10', 'Standard check', '29D-33221'),
+('2025-09-10', 'Pass', 'Dao Anh', '2026-09-10', 'Commercial check', '30E-99001');
 
 -- 11. TRAFFICVIOLATION
-INSERT INTO TRAFFICVIOLATION (Violate_ID, Violation_Type, Violation_Date, Location, Description, Plate_Num) VALUES
-(1, 'Speeding', '2026-01-10', 'Phap Van - Cau Gie', 'Exceeded speed limit by 15km/h', '29A-12345'),
-(2, 'Red Light', '2026-01-12', 'Ngã tư Láng Hạ', 'Ran a red traffic light', '30F-54321'),
-(3, 'Wrong Lane', '2026-01-15', 'Vo Van Kiet', 'Drove in restricted lane', '51G-99887'),
-(4, 'Illegal Parking', '2026-01-18', 'Nguyen Hue, D1', 'Parked in a no-parking zone', '43C-11223'),
-(5, 'Speeding', '2026-01-20', 'Cao toc Long Thanh', 'Exceeded speed limit by 25km/h', '60B-33445'),
-(6, 'No Helmet / Seatbelt', '2026-01-22', 'Cau Giay', 'Driver not wearing seatbelt', '51H-66778'),
-(7, 'Wrong Lane', '2026-01-25', 'Thang Long Blvd', 'Improper lane changing', '29C-44556'),
-(8, 'Red Light', '2026-01-28', 'Hai Ba Trung', 'Ran a red traffic light', '30G-77889'),
-(9, 'Speeding', '2026-02-01', 'Sai Gon Bridge', 'Exceeded speed limit', '51F-13579'),
-(10, 'Illegal Parking', '2026-02-03', 'Dong Khoi', 'Double parking', '61D-24680'),
-(11, 'Speeding', '2026-02-05', 'Nhat Tan Bridge', 'Exceeded speed limit', '15A-98765'),
-(12, 'Red Light', '2026-02-08', 'Giang Vo', 'Ran a red light', '37B-55443'),
-(13, 'Wrong Lane', '2026-02-10', 'Nguyen Van Linh', 'Improper turning', '51K-11122'),
-(14, 'Illegal Parking', '2026-02-12', 'Ba Trieu', 'Parked on sidewalk', '29D-33221'),
-(15, 'Speeding', '2026-02-15', 'Trung Hoa', 'Exceeded speed limit', '30E-99001');
+INSERT INTO TRAFFICVIOLATION (Violation_Type, Violation_Date, Location, Description, Plate_Num) VALUES
+('Speeding', '2026-01-10', 'Phap Van - Cau Gie', 'Exceeded speed limit by 15km/h', '29A-12345'),
+('Red Light', '2026-01-12', 'Ngã tư Láng Hạ', 'Ran a red traffic light', '30F-54321'),
+('Wrong Lane', '2026-01-15', 'Vo Van Kiet', 'Drove in restricted lane', '51G-99887'),
+('Illegal Parking', '2026-01-18', 'Nguyen Hue, D1', 'Parked in a no-parking zone', '43C-11223'),
+('Speeding', '2026-01-20', 'Cao toc Long Thanh', 'Exceeded speed limit by 25km/h', '60B-33445'),
+('No Helmet / Seatbelt', '2026-01-22', 'Cau Giay', 'Driver not wearing seatbelt', '51H-66778'),
+('Wrong Lane', '2026-01-25', 'Thang Long Blvd', 'Improper lane changing', '29C-44556'),
+('Red Light', '2026-01-28', 'Hai Ba Trung', 'Ran a red traffic light', '30G-77889'),
+('Speeding', '2026-02-01', 'Sai Gon Bridge', 'Exceeded speed limit', '51F-13579'),
+('Illegal Parking', '2026-02-03', 'Dong Khoi', 'Double parking', '61D-24680'),
+('Speeding', '2026-02-05', 'Nhat Tan Bridge', 'Exceeded speed limit', '15A-98765'),
+('Red Light', '2026-02-08', 'Giang Vo', 'Ran a red light', '37B-55443'),
+('Wrong Lane', '2026-02-10', 'Nguyen Van Linh', 'Improper turning', '51K-11122'),
+('Illegal Parking', '2026-02-12', 'Ba Trieu', 'Parked on sidewalk', '29D-33221'),
+('Speeding', '2026-02-15', 'Trung Hoa', 'Exceeded speed limit', '30E-99001');
 
 -- 12. FINE
 INSERT INTO FINE (Violate_ID, Amount, Due_Date, Payment_Status, Paid_Date) VALUES
-( 1, 1000000.00, '2026-02-10', 'Paid', '2026-01-15'),
+(1, 1000000.00, '2026-02-10', 'Paid', '2026-01-15'),
 (2, 2000000.00, '2026-02-12', 'Paid', '2026-01-18'),
 (3, 1500000.00, '2026-02-15', 'Unpaid', NULL),
 (4, 800000.00, '2026-02-18', 'Paid', '2026-01-20'),

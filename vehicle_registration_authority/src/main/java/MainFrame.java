@@ -903,7 +903,6 @@ public class MainFrame extends JFrame {
 
         btAdd.addActionListener(e -> {
             int nextNum = insuranceTableModel.getRowCount() + 1;
-            JTextField tfNum = new JTextField(String.format("POL%03d", nextNum));
             JTextField tfName = new JTextField("Bao hiem TNDS " + nextNum);
             JTextField tfStart = new JTextField("2026-01-01");
             JTextField tfEnd = new JTextField("2027-01-01");
@@ -911,7 +910,6 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Policy Number:")); f.add(tfNum);
             f.add(new JLabel("Policy Name:")); f.add(tfName);
             f.add(new JLabel("Start Date (YYYY-MM-DD):")); f.add(tfStart);
             f.add(new JLabel("End Date (YYYY-MM-DD):")); f.add(tfEnd);
@@ -921,8 +919,8 @@ public class MainFrame extends JFrame {
             if (JOptionPane.showConfirmDialog(this, f, "Add Insurance Policy", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
-                            "INSERT INTO INSURANCEPOLICY (Policy_Num, Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
-                            tfNum.getText().trim(), tfName.getText().trim(), Date.valueOf(tfStart.getText().trim()),
+                            "INSERT INTO INSURANCEPOLICY (Policy_Name, Start_Date, End_Date, Insurance_Type, Plate_Num) VALUES (?, ?, ?, ?, ?)",
+                            tfName.getText().trim(), Date.valueOf(tfStart.getText().trim()),
                             Date.valueOf(tfEnd.getText().trim()), tfType.getText().trim(), cbPlate.getSelectedItem().toString().trim()
                     );
                     loadInsuranceFromDatabase();
@@ -960,8 +958,6 @@ public class MainFrame extends JFrame {
         inspectionTable = new JTable(inspectionTableModel);
 
         btAdd.addActionListener(e -> {
-            int nextId = dao.getNextIntId("INSPECTION", "Inspection_ID");
-            JTextField tfId = new JTextField(String.valueOf(nextId));
             JTextField tfDate = new JTextField("2026-01-01");
             JTextField tfRes = new JTextField("Pass");
             JTextField tfInsp = new JTextField("Nguyen Van Thanh");
@@ -970,7 +966,6 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Inspection ID:")); f.add(tfId);
             f.add(new JLabel("Inspection Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Result (Pass/Fail):")); f.add(tfRes);
             f.add(new JLabel("Inspector Name:")); f.add(tfInsp);
@@ -981,8 +976,8 @@ public class MainFrame extends JFrame {
             if (JOptionPane.showConfirmDialog(this, f, "Add Technical Inspection", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
-                            "INSERT INTO INSPECTION (Inspection_ID, Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            Integer.parseInt(tfId.getText().trim()), Date.valueOf(tfDate.getText().trim()), tfRes.getText().trim(),
+                            "INSERT INTO INSPECTION (Inspection_Date, Result, Inspector_Name, Expiry_Date, Notes, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
+                            Date.valueOf(tfDate.getText().trim()), tfRes.getText().trim(),
                             tfInsp.getText().trim(), Date.valueOf(tfExp.getText().trim()), tfNotes.getText().trim(),
                             cbPlate.getSelectedItem().toString().trim()
                     );
@@ -1024,8 +1019,6 @@ public class MainFrame extends JFrame {
         violationTable = new JTable(violationTableModel);
 
         btAddV.addActionListener(e -> {
-            int nextId = dao.getNextIntId("TRAFFICVIOLATION", "Violate_ID");
-            JTextField tfId = new JTextField(String.valueOf(nextId));
             JTextField tfType = new JTextField("Speeding");
             JTextField tfDate = new JTextField("2026-03-01");
             JTextField tfLoc = new JTextField("Vo Van Kiet, D1");
@@ -1033,7 +1026,6 @@ public class MainFrame extends JFrame {
             JComboBox<String> cbPlate = createPlateComboBox();
 
             JPanel f = new JPanel(new GridLayout(0, 2, 6, 6));
-            f.add(new JLabel("Violation ID:")); f.add(tfId);
             f.add(new JLabel("Violation Type:")); f.add(tfType);
             f.add(new JLabel("Violation Date (YYYY-MM-DD):")); f.add(tfDate);
             f.add(new JLabel("Location:")); f.add(tfLoc);
@@ -1043,8 +1035,8 @@ public class MainFrame extends JFrame {
             if (JOptionPane.showConfirmDialog(this, f, "Add Traffic Violation", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
                     dao.executeUpdate(
-                            "INSERT INTO TRAFFICVIOLATION (Violate_ID, Violation_Type, Violation_Date, Location, Description, Plate_Num) VALUES (?, ?, ?, ?, ?, ?)",
-                            Integer.parseInt(tfId.getText().trim()), tfType.getText().trim(),
+                            "INSERT INTO TRAFFICVIOLATION (Violation_Type, Violation_Date, Location, Description, Plate_Num) VALUES (?, ?, ?, ?, ?)",
+                            tfType.getText().trim(),
                             Date.valueOf(tfDate.getText().trim()), tfLoc.getText().trim(),
                             tfDesc.getText().trim(), cbPlate.getSelectedItem().toString().trim()
                     );
