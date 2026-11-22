@@ -310,9 +310,35 @@ public class DatabaseDAO {
         return list;
     }
 
-    public void saveOwnerContacts(int ownerId, String phone, String email) throws SQLException {
+    public void saveOwnerContacts(int ownerId, List<String> phones, List<String> emails) throws SQLException {
         try (Connection conn = getConnection()) {
-            upsertOwnerContacts(conn, ownerId, phone, email);
+            conn.setAutoCommit(false);
+            try {
+                replaceContacts(conn, "Owner_phone", "Phone", ownerId, phones);
+                replaceContacts(conn, "Owner_email", "email", ownerId, emails);
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    private void replaceContacts(Connection conn, String table, String col, int ownerId, List<String> values) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM " + table + " WHERE OwnerID = ?")) {
+            ps.setInt(1, ownerId);
+            ps.executeUpdate();
+        }
+        try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO " + table + " (OwnerID, " + col + ") VALUES (?, ?)")) {
+            for (String v : values) {
+                ps.setInt(1, ownerId);
+                ps.setString(2, v);
+                ps.addBatch();
+            }
+            ps.executeBatch();
         }
     }
 

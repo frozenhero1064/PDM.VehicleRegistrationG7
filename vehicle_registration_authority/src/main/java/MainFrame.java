@@ -337,26 +337,31 @@ public class MainFrame extends JFrame {
             List<String> phones = dao.getOwnerContacts("Owner_phone", "Phone", ownerId);
             List<String> emails = dao.getOwnerContacts("Owner_email", "email", ownerId);
 
-            JTextField tfNewPhone = new JTextField(phones.isEmpty() ? "" : phones.get(0));
-            JTextField tfNewEmail = new JTextField(emails.isEmpty() ? "" : emails.get(0));
+            JTextArea taPhones = new JTextArea(String.join("\n", phones), 2, 25);
+            JTextArea taEmails = new JTextArea(String.join("\n", emails), 2, 25);
 
             JPanel panel = new JPanel(new GridLayout(0, 1, 4, 4));
             panel.add(new JLabel("OwnerID: " + ownerId));
-            panel.add(new JLabel("Current Phone: " + (phones.isEmpty() ? "None" : String.join(", ", phones))));
-            panel.add(new JLabel("Current Email: " + (emails.isEmpty() ? "None" : String.join(", ", emails))));
-            panel.add(new JLabel("Set / Update Phone Number:"));
-            panel.add(tfNewPhone);
-            panel.add(new JLabel("Set / Update Email Address:"));
-            panel.add(tfNewEmail);
+            panel.add(new JLabel("Phone numbers (one per line):"));
+            panel.add(new JScrollPane(taPhones));
+            panel.add(new JLabel("Email addresses (one per line):"));
+            panel.add(new JScrollPane(taEmails));
 
             if (JOptionPane.showConfirmDialog(this, panel, "Owner Contacts", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                dao.saveOwnerContacts(ownerId, tfNewPhone.getText().trim(), tfNewEmail.getText().trim());
+                dao.saveOwnerContacts(ownerId, parseLines(taPhones.getText()), parseLines(taEmails.getText()));
                 JOptionPane.showMessageDialog(this, "Contact details saved!");
             }
         } catch (SQLException ex) { showDbError(ex); }
     }
 
-
+    private List<String> parseLines(String text) {
+        java.util.Set<String> out = new java.util.LinkedHashSet<>();
+        for (String line : text.split("\\R")) {
+            String v = line.trim();
+            if (!v.isEmpty()) out.add(v);
+        }
+        return new ArrayList<>(out);
+    }
 
     private JPanel createOwnershipTab() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -598,7 +603,7 @@ public class MainFrame extends JFrame {
             f.add(new JLabel("Inspector Name:")); f.add(tfInsp);
             f.add(new JLabel("Expiry Date (YYYY-MM-DD):")); f.add(tfExp);
             f.add(new JLabel("Notes:")); f.add(tfNotes);
-            f.add(new JLabel("Select Vehicle Plate Num:")); f.add(cbPlate);
+            f.add(new JLabel("Select Vehicle Plate Number:")); f.add(cbPlate);
 
             if (JOptionPane.showConfirmDialog(this, f, "Add Technical Inspection", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
                 try {
