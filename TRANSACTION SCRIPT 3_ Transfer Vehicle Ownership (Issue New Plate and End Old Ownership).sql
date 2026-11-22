@@ -1,5 +1,3 @@
-DELIMITER ;
-
 USE VehicleManagement;
 DROP PROCEDURE IF EXISTS sp_TransferVehicleOwnership;
 DELIMITER //
