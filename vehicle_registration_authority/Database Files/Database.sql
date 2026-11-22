@@ -9,11 +9,12 @@ CREATE TABLE VEHICLE (
     Model VARCHAR(50),
     YOM INT,
     Color VARCHAR(30),
-    Type VARCHAR(30)
+    Type VARCHAR(30),
+    UNIQUE (Chassis_Num, Engine_Num)
 );
 
 CREATE TABLE Owner (
-    OwnerID INT NOT NULL,
+    OwnerID INT NOT NULL AUTO_INCREMENT,
     Street VARCHAR(250),
     District VARCHAR(250),
     City VARCHAR(250),
@@ -31,6 +32,7 @@ CREATE TABLE Individual (
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE Organisation (
@@ -41,41 +43,42 @@ CREATE TABLE Organisation (
     PRIMARY KEY (OwnerID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE Owner_email (
     OwnerID INT NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    PRIMARY KEY (OwnerID),
+    PRIMARY KEY (OwnerID, email),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE Owner_phone (
     OwnerID INT NOT NULL,
     Phone VARCHAR(20) NOT NULL,
-    PRIMARY KEY (OwnerID),
+    PRIMARY KEY (OwnerID, phone),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE REGISTRATION (
 	Plate_Num VARCHAR(20) PRIMARY KEY,
-    Chassis_Num VARCHAR(50),
-    Engine_Num VARCHAR(50),
+    Chassis_Num VARCHAR(50) UNIQUE,
+    Engine_Num VARCHAR(50) UNIQUE,
     Registration_Date DATE,
     Expiry_Date DATE,
     Status VARCHAR(30),
     Issued_By VARCHAR(100),
-    FOREIGN KEY (Chassis_Num) REFERENCES VEHICLE(Chassis_Num)
-    	ON DELETE CASCADE,
-    FOREIGN KEY (Engine_Num) REFERENCES VEHICLE(Engine_Num)
+    FOREIGN KEY (Chassis_Num, Engine_Num) REFERENCES VEHICLE(Chassis_Num, Engine_Num)
 		ON DELETE CASCADE
-
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE Ownership (
-    Ownership_ID INT NOT NULL,
+    Ownership_ID INT NOT NULL AUTO_INCREMENT,
     OwnerID INT NOT NULL,
     Plate_Num VARCHAR(20),
     Start_Date DATE,
@@ -83,9 +86,11 @@ CREATE TABLE Ownership (
     Transfer_Type VARCHAR(100),
     PRIMARY KEY (Ownership_ID),
     FOREIGN KEY (OwnerID) REFERENCES Owner(OwnerID)
-    	ON DELETE CASCADE,
+    	ON DELETE CASCADE
+        ON UPDATE CASCADE,
     FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE INSURANCEPOLICY (
@@ -97,6 +102,7 @@ CREATE TABLE INSURANCEPOLICY (
     Plate_Num VARCHAR(20),
     FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
     	ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE INSPECTION (
@@ -109,6 +115,7 @@ CREATE TABLE INSPECTION (
     Plate_Num VARCHAR(20),
     FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE TRAFFICVIOLATION (
@@ -120,6 +127,7 @@ CREATE TABLE TRAFFICVIOLATION (
     Plate_Num VARCHAR(20),
     FOREIGN KEY (Plate_Num) REFERENCES REGISTRATION(Plate_Num)
     	ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE FINE (
@@ -131,6 +139,7 @@ CREATE TABLE FINE (
     PRIMARY KEY (Violate_ID),
     FOREIGN KEY (Violate_ID) REFERENCES TRAFFICVIOLATION(Violate_ID)
 		ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 -- 1. VEHICLE
@@ -392,25 +401,25 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction failed: Ownership transfer aborted.';
+        RESIGNAL;
+        -- SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction failed: Ownership transfer aborted.';
     END;
 
     START TRANSACTION;
 
-		-- Set the old registration to transfered
-		UPDATE REGISTRATION
-        SET Status = "Transfered"
-        WHERE Plate_Num = p_OldPlate;
-
-        -- Add new registration for the new plate for same vehicle
-        INSERT INTO REGISTRATION (Plate_Num, Chassis_Num, Engine_Num, Registration_Date, Expiry_Date, Status, Issued_By)
-        SELECT p_NewPlate, Chassis_Num, Engine_Num, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 10 YEAR), "Active", p_NewIssuedBy
-        FROM REGISTRATION WHERE Plate_Num = p_OldPlate;
-
-        -- Set the old ownership to not owned anymore
+		-- Set the old ownership to not owned anymore
         UPDATE Ownership
         SET End_Date = CURDATE(), Transfer_Type = "Transfered"
         WHERE Plate_Num = p_OldPlate AND Ownership_ID > 0;
+
+		-- Update old registration
+		UPDATE REGISTRATION
+		SET Plate_Num = p_NewPlate,
+			Registration_Date = CURDATE(),
+			Expiry_Date = DATE_ADD(CURDATE(), INTERVAL 10 YEAR),
+			Status = 'Active',
+			Issued_By = p_NewIssuedBy
+		WHERE Plate_Num = p_OldPlate;
 
         -- Create new ownership link
         INSERT INTO Ownership (Ownership_ID, OwnerID, Plate_Num, Start_Date, End_Date, Transfer_Type)
